@@ -53,4 +53,11 @@ npm run build
 
 ## Deployment
 
-Push to GitHub, import into Vercel, configure the environment variables, and deploy. Use Upstash Redis or Vercel KV if admin edits and registration history should persist in production.
+The project is ready to push from the `main` branch:
+
+```bash
+git remote add origin <your-github-repo-url>
+git push -u origin main
+```
+
+Then import the GitHub repo into Vercel, configure the environment variables, and deploy. Use Upstash Redis or Vercel KV if admin edits and registration history should persist in production.
