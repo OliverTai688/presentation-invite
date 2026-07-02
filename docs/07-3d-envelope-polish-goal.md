@@ -22,11 +22,18 @@ The `bni` Codex heartbeat automation is active again and attached to this thread
 
 Use subAgents for focused research, UX audit, or verification. The main agent owns integration.
 
-Current subAgent task:
+Completed subAgent research:
 
 - Research third-party animation and 3D options for the envelope/poster interaction.
 - Compare CSS 3D, Framer Motion, GSAP, Three.js/react-three-fiber, Theatre.js, Lottie, and react-spring.
 - Recommend the safest route for Next.js 16, React 19, Vercel, and npm/package-lock.
+
+Research outcome:
+
+- Adopted route: keep Framer Motion + CSS 3D and do not add new runtime dependencies.
+- Applied refinements: staged open timing, seal fade, flap opening, poster pull-up, pointer parallax, paper texture, flap back face, and envelope depth.
+- Deferred route: GSAP can be considered only if future timeline control becomes difficult.
+- Avoided route for this scope: Three.js/react-three-fiber, Theatre.js, Lottie, and react-spring, because their added bundle, SSR, or workflow complexity is not justified for the current interaction.
 
 ## Allowed Enhancements
 
