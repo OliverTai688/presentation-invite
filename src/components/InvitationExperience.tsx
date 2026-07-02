@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type PointerEvent,
 } from "react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -190,6 +191,28 @@ export function InvitationExperience({
     });
   }
 
+  function updateLetterParallax(event: PointerEvent<HTMLButtonElement>) {
+    if (opening || shouldReduceMotion) {
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+    event.currentTarget.style.setProperty("--letter-tilt-x", `${x * 5}deg`);
+    event.currentTarget.style.setProperty("--letter-tilt-y", `${y * -4}deg`);
+    event.currentTarget.style.setProperty("--letter-glow-x", `${(x + 0.5) * 100}%`);
+    event.currentTarget.style.setProperty("--letter-glow-y", `${(y + 0.5) * 100}%`);
+  }
+
+  function resetLetterParallax(event: PointerEvent<HTMLButtonElement>) {
+    event.currentTarget.style.removeProperty("--letter-tilt-x");
+    event.currentTarget.style.removeProperty("--letter-tilt-y");
+    event.currentTarget.style.removeProperty("--letter-glow-x");
+    event.currentTarget.style.removeProperty("--letter-glow-y");
+  }
+
   function openInvitation() {
     if (opening) {
       return;
@@ -203,7 +226,7 @@ export function InvitationExperience({
     setOpening(true);
     openingTimerRef.current = setTimeout(() => {
       setOpened(true);
-    }, 1480);
+    }, 1760);
   }
 
   async function copyCouponCode(code: string) {
@@ -233,6 +256,8 @@ export function InvitationExperience({
               className={styles.letterButton}
               data-opening={opening ? "true" : "false"}
               onClick={openInvitation}
+              onPointerLeave={resetLetterParallax}
+              onPointerMove={updateLetterParallax}
               whileHover={shouldReduceMotion || opening ? undefined : { y: -6 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               type="button"
