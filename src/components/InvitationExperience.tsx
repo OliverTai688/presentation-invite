@@ -64,6 +64,7 @@ export function InvitationExperience({
   content: InvitationContent;
 }) {
   const [opened, setOpened] = useState(false);
+  const [opening, setOpening] = useState(false);
   const [posterFocused, setPosterFocused] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
@@ -71,6 +72,7 @@ export function InvitationExperience({
   const [coupon, setCoupon] = useState<CouponState | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const couponRef = useRef<HTMLElement | null>(null);
+  const openingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
   const eventChips = useMemo(
@@ -120,6 +122,14 @@ export function InvitationExperience({
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [posterFocused]);
+
+  useEffect(() => {
+    return () => {
+      if (openingTimerRef.current) {
+        clearTimeout(openingTimerRef.current);
+      }
+    };
+  }, []);
 
   function updateField(field: keyof FormState) {
     return (event: ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +190,22 @@ export function InvitationExperience({
     });
   }
 
+  function openInvitation() {
+    if (opening) {
+      return;
+    }
+
+    if (shouldReduceMotion) {
+      setOpened(true);
+      return;
+    }
+
+    setOpening(true);
+    openingTimerRef.current = setTimeout(() => {
+      setOpened(true);
+    }, 1480);
+  }
+
   async function copyCouponCode(code: string) {
     try {
       await navigator.clipboard.writeText(code);
@@ -202,23 +228,55 @@ export function InvitationExperience({
             transition={{ duration: 0.45, ease: "easeOut" }}
           >
             <motion.button
-              className={styles.invitationCard}
-              onClick={() => setOpened(true)}
-              whileHover={shouldReduceMotion ? undefined : { y: -6 }}
+              aria-busy={opening}
+              aria-label="開啟邀請函，查看活動海報與報名資訊"
+              className={styles.letterButton}
+              data-opening={opening ? "true" : "false"}
+              onClick={openInvitation}
+              whileHover={shouldReduceMotion || opening ? undefined : { y: -6 }}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               type="button"
             >
-              <span className={styles.cardTopline}>{content.chapterName}</span>
-              <span className={styles.cardTitle}>{content.eventTitle}</span>
-              <span className={styles.cardMeta}>
-                {content.eventDate} / {content.eventTime}
+              <span className={styles.letterCopy}>
+                <span className={styles.letterKicker}>{content.chapterName}</span>
+                <span className={styles.letterTitle}>{content.eventTitle}</span>
+                <span className={styles.letterMeta}>
+                  {content.eventDate} / {content.eventTime}
+                </span>
+                <span className={styles.letterSpeaker}>
+                  {content.speakerCompany} · {content.speakerName}
+                </span>
+                <span className={styles.letterAction}>
+                  <Sparkles size={18} aria-hidden="true" />
+                  {opening ? "展開邀請函" : "開啟邀請函"}
+                </span>
               </span>
-              <span className={styles.cardSpeaker}>
-                {content.speakerCompany} · {content.speakerName}
-              </span>
-              <span className={styles.cardAction}>
-                <Sparkles size={18} aria-hidden="true" />
-                開啟邀請函
+
+              <span className={styles.letterScene} aria-hidden="true">
+                <span className={styles.envelopeRig}>
+                  <span className={styles.letterPoster}>
+                    <Image
+                      src={content.posterImagePath}
+                      alt=""
+                      width={1076}
+                      height={1522}
+                      sizes="(max-width: 760px) 42vw, 240px"
+                    />
+                  </span>
+                  <span className={styles.envelopeBack} />
+                  <span className={styles.envelopeFlap}>
+                    <span className={styles.envelopeSeal}>BNI</span>
+                  </span>
+                  <span className={styles.envelopePocket}>
+                    <span className={styles.envelopeAddress}>
+                      <span>{content.speakerName}</span>
+                      <span>{content.topic}</span>
+                    </span>
+                  </span>
+                  <span className={styles.envelopeLeftWing} />
+                  <span className={styles.envelopeRightWing} />
+                  <span className={styles.envelopeFront} />
+                </span>
               </span>
             </motion.button>
           </motion.section>
