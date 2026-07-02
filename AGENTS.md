@@ -41,8 +41,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Make the poster inspectable on mobile and desktop; avoid cropping essential poster text.
 - Use `docs/03-design-benchmarks.md` as the design benchmark reference. The recommended direction is Luma/Partiful for RSVP flow, Linear/Raycast/Vercel/Framer for minimal premium interaction craft.
 - Use `docs/06-third-party-ux-resources.md` for third-party motion/UI resource decisions.
+- Use `docs/07-3d-envelope-polish-goal.md` when working on the 3D real-envelope invitation opening experience and its automation/subAgent workflow.
 - Prefer `framer-motion` first for animation because it is already installed. Add `canvas-confetti`, `gsap`, `lenis`, `vaul`, or `three` only when the intended interaction clearly needs them.
 - `sonner` is installed for polished toast feedback; use it for form, copy, and admin status feedback instead of adding another notification library.
+- For major animation changes, use a subAgent for focused third-party research, UX audit, or verification. The main agent owns integration and final checks.
 
 ## Verification
 
