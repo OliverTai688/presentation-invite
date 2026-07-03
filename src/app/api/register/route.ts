@@ -18,62 +18,70 @@ function makeCouponCode(name: string, lineId: string) {
 }
 
 export async function POST(request: Request) {
-  const payload = await parseJsonRequest(request);
-  const validation = validateRegistrationInput(payload);
-
-  if (!validation.ok) {
-    return Response.json({ error: validation.error }, { status: 400 });
-  }
-
-  const content = await getInvitationContent();
-  const input = validation.value;
-  const registration: Registration = {
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-    name: input.name,
-    lineId: input.lineId,
-    email: input.email,
-    referrerName: input.referrerName,
-    couponCode: makeCouponCode(input.name, input.lineId),
-    source: input.source,
-  };
-
-  await saveRegistration(registration);
-
   try {
-    const emailResult = await sendRegistrationEmails(content, registration);
+    const payload = await parseJsonRequest(request);
+    const validation = validateRegistrationInput(payload);
 
-    return Response.json({
-      registration,
-      coupon: {
-        title: content.couponTitle,
-        description: content.couponDescription,
-        code: registration.couponCode,
-      },
-      email: emailResult,
-      storageMode: getStorageMode(),
-    });
-  } catch (error) {
-    console.error("Failed to send registration email", error);
+    if (!validation.ok) {
+      return Response.json({ error: validation.error }, { status: 400 });
+    }
 
-    return Response.json(
-      {
+    const content = await getInvitationContent();
+    const input = validation.value;
+    const registration: Registration = {
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      name: input.name,
+      lineId: input.lineId,
+      email: input.email,
+      referrerName: input.referrerName,
+      couponCode: makeCouponCode(input.name, input.lineId),
+      source: input.source,
+    };
+
+    await saveRegistration(registration);
+
+    try {
+      const emailResult = await sendRegistrationEmails(content, registration);
+
+      return Response.json({
         registration,
         coupon: {
           title: content.couponTitle,
           description: content.couponDescription,
           code: registration.couponCode,
         },
-        email: {
-          configured: true,
-          organizerEmailSent: false,
-          attendeeEmailSent: false,
-        },
+        email: emailResult,
         storageMode: getStorageMode(),
-        warning:
-          "報名已儲存，但 Email 寄送失敗。請檢查 Gmail 應用程式密碼與環境變數。",
-      },
-      { status: 202 },
+      });
+    } catch (error) {
+      console.error("Failed to send registration email", error);
+
+      return Response.json(
+        {
+          registration,
+          coupon: {
+            title: content.couponTitle,
+            description: content.couponDescription,
+            code: registration.couponCode,
+          },
+          email: {
+            configured: true,
+            organizerEmailSent: false,
+            attendeeEmailSent: false,
+          },
+          storageMode: getStorageMode(),
+          warning:
+            "報名已儲存，但 Email 寄送失敗。請檢查 Gmail 應用程式密碼與環境變數。",
+        },
+        { status: 202 },
+      );
+    }
+  } catch (error) {
+    console.error("Unexpected error in /api/register", error);
+    return Response.json(
+      { error: "發生未預期的錯誤，請確認伺服器儲存空間或環境變數設定是否正確。" },
+      { status: 500 }
     );
   }
 }

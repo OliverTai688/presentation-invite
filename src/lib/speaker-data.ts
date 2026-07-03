@@ -70,6 +70,11 @@ export const speakerData = {
     ],
     education: [
       {
+        school: "輔仁大學",
+        degree: "心理學系博士班 工商心理組（在學就讀中）",
+        period: "在學中",
+      },
+      {
         school: "國立中央大學",
         degree: "通訊工程學系 學士",
         period: "2016年9月 – 2020年6月",
@@ -121,6 +126,11 @@ export const speakerData = {
       },
     ],
     education: [
+      {
+        school: "Fu Jen Catholic University",
+        degree: "Ph.D. in Psychology, Industrial-Organizational Psychology (In Progress)",
+        period: "In Progress",
+      },
       {
         school: "National Central University",
         degree: "Bachelor of Science, Telecommunications Engineering",

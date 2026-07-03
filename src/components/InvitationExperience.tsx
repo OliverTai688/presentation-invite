@@ -212,7 +212,12 @@ export function InvitationExperience({
       }),
     });
 
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      result = { error: "伺服器發生錯誤，請稍後再試。" };
+    }
 
     // Keep the "歡迎交流商會點子" loading visible long enough to read on fast responses.
     const minVisibleMs = shouldReduceMotion ? 0 : 850;
