@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type FormEvent,
   type PointerEvent,
 } from "react";
 import confetti from "canvas-confetti";
@@ -18,7 +19,6 @@ import {
 import Image from "next/image";
 import { toast } from "sonner";
 import {
-  ArrowDown,
   BadgeCheck,
   CalendarDays,
   CalendarPlus,
@@ -157,6 +157,19 @@ function buildCalendarLinks(content: InvitationContent): CalendarLinks | null {
   return { google, ics };
 }
 
+// The event title carries "主標｜副標" — split on the full/half-width bar so
+// the hero can render a strong main title with a lighter subtitle beneath it.
+function splitEventTitle(eventTitle: string) {
+  const parts = eventTitle
+    .split(/[｜|]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  return {
+    main: parts[0] ?? eventTitle,
+    sub: parts.slice(1).join(" "),
+  };
+}
+
 export function InvitationExperience({
   content,
 }: {
@@ -178,6 +191,10 @@ export function InvitationExperience({
   const shouldReduceMotion = useReducedMotion();
   const isRegistered = Boolean(coupon);
   const calendarLinks = useMemo(() => buildCalendarLinks(content), [content]);
+  const { main: titleMain, sub: titleSub } = useMemo(
+    () => splitEventTitle(content.eventTitle),
+    [content.eventTitle],
+  );
 
   const eventChips = useMemo(
     () => [
@@ -302,13 +319,6 @@ export function InvitationExperience({
     setForm(emptyForm);
   }
 
-  function scrollToForm() {
-    formRef.current?.scrollIntoView({
-      behavior: shouldReduceMotion ? "auto" : "smooth",
-      block: "start",
-    });
-  }
-
   function updateLetterParallax(event: PointerEvent<HTMLButtonElement>) {
     if (opening || shouldReduceMotion) {
       return;
@@ -329,6 +339,15 @@ export function InvitationExperience({
     event.currentTarget.style.removeProperty("--letter-tilt-y");
     event.currentTarget.style.removeProperty("--letter-glow-x");
     event.currentTarget.style.removeProperty("--letter-glow-y");
+  }
+
+  function openLinkedinPopup(event: React.MouseEvent<HTMLAnchorElement>, url: string) {
+    event.preventDefault();
+    const width = 800;
+    const height = 900;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    window.open(url, "linkedinPopup", `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`);
   }
 
   function openInvitation() {
@@ -402,7 +421,12 @@ export function InvitationExperience({
             >
               <span className={styles.letterCopy}>
                 <span className={styles.letterKicker}>{content.chapterName}</span>
-                <span className={styles.letterTitle}>{content.eventTitle}</span>
+                <span className={styles.letterTitle} data-text={titleMain}>
+                  {titleMain}
+                </span>
+                {titleSub ? (
+                  <span className={styles.letterSubtitle}>{titleSub}</span>
+                ) : null}
                 <span className={styles.letterMeta}>
                   {content.eventDate} / {content.eventTime}
                 </span>
@@ -457,7 +481,10 @@ export function InvitationExperience({
               <div className={styles.posterToolbar}>
                 <div className={styles.posterToolbarText}>
                   <p>{content.chapterName}</p>
-                  <h1>{content.eventTitle}</h1>
+                  <h1 data-text={titleMain}>{titleMain}</h1>
+                  {titleSub ? (
+                    <p className={styles.posterSubtitle}>{titleSub}</p>
+                  ) : null}
                 </div>
 
               </div>
@@ -515,8 +542,7 @@ export function InvitationExperience({
                           className={`${styles.linkButton} ${styles.tooltipTarget}`}
                           data-tooltip="開啟 LinkedIn"
                           href={content.linkedinUrl}
-                          target="_blank"
-                          rel="noreferrer"
+                          onClick={(e) => openLinkedinPopup(e, content.linkedinUrl)}
                         >
                           <Contact size={18} aria-hidden="true" />
                           個人經歷
@@ -797,8 +823,7 @@ export function InvitationExperience({
                             <a
                               className={styles.linkButton}
                               href={content.linkedinUrl}
-                              target="_blank"
-                              rel="noreferrer"
+                              onClick={(e) => openLinkedinPopup(e, content.linkedinUrl)}
                             >
                               <Contact size={18} aria-hidden="true" />
                               個人經歷
