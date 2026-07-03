@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppToaster } from "@/components/AppToaster";
+import { defaultInvitationContent } from "@/lib/invitation-content";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,10 +14,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteTitle = `${defaultInvitationContent.topic}邀請函｜${defaultInvitationContent.speakerName} × BNI 長冠軍分會`;
+const siteDescription = `${defaultInvitationContent.speakerName} ${defaultInvitationContent.eventDate} ${defaultInvitationContent.topic}活動邀請與報名。${defaultInvitationContent.description}`;
+
 export const metadata: Metadata = {
-  title: "BNI AI 商務力邀請函",
-  description:
-    "BNI 臺北北區長冠軍分會 2026/7/9 AI 商務力活動邀請與報名。",
+  applicationName: siteTitle,
+  title: {
+    default: siteTitle,
+    template: `%s｜${defaultInvitationContent.topic}邀請函`,
+  },
+  description: siteDescription,
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    siteName: siteTitle,
+    locale: "zh_TW",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

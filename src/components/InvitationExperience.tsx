@@ -320,22 +320,24 @@ export function InvitationExperience({
                   <p>{content.chapterName}</p>
                   <h1>{content.eventTitle}</h1>
                 </div>
-                <button
-                  className={styles.iconButton}
-                  onClick={() => setPosterFocused(true)}
-                  type="button"
-                  aria-label="放大海報"
-                >
-                  <ZoomIn size={18} aria-hidden="true" />
-                </button>
-                <button
-                  className={styles.rsvpButton}
-                  onClick={scrollToForm}
-                  type="button"
-                >
-                  <ArrowDown size={17} aria-hidden="true" />
-                  報名
-                </button>
+                <div className={styles.posterActions}>
+                  <button
+                    className={styles.iconButton}
+                    onClick={() => setPosterFocused(true)}
+                    type="button"
+                    aria-label="放大海報"
+                  >
+                    <ZoomIn size={18} aria-hidden="true" />
+                  </button>
+                  <button
+                    className={styles.rsvpButton}
+                    onClick={scrollToForm}
+                    type="button"
+                  >
+                    <ArrowDown size={17} aria-hidden="true" />
+                    報名
+                  </button>
+                </div>
               </div>
               <motion.button
                 className={styles.posterFrame}
@@ -348,7 +350,7 @@ export function InvitationExperience({
                   alt={`${content.eventTitle} 活動海報`}
                   width={1076}
                   height={1522}
-                  sizes="(max-width: 900px) 100vw, 58vw"
+                  sizes="(max-width: 900px) 78vw, 380px"
                   loading="eager"
                   priority
                 />
@@ -356,21 +358,156 @@ export function InvitationExperience({
             </section>
 
             <aside className={styles.sidePanel} aria-label="活動資訊與報名">
-              <div className={styles.chipGrid}>
-                {eventChips.map(({ icon: Icon, label }) => (
-                  <div className={styles.infoChip} key={label}>
-                    <Icon size={18} aria-hidden="true" />
-                    <span>{label}</span>
-                  </div>
-                ))}
-              </div>
+              <section className={styles.inviteSummary}>
+                <div className={styles.chipGrid}>
+                  {eventChips.map(({ icon: Icon, label }) => (
+                    <div className={styles.infoChip} key={label}>
+                      <Icon size={17} aria-hidden="true" />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
 
-              <section className={styles.profileBlock}>
-                <p className={styles.eyebrow}>Speaker</p>
-                <h2>{content.speakerName}</h2>
-                <p>{content.speakerCompany}</p>
-                <p className={styles.muted}>{content.speakerRoles}</p>
+                <section className={styles.profileBlock}>
+                  <p className={styles.eyebrow}>Speaker</p>
+                  <h2>{content.speakerName}</h2>
+                  <p>{content.speakerCompany}</p>
+                  <p className={styles.muted}>{content.speakerRoles}</p>
+                </section>
+
+                <div className={styles.linkRow}>
+                  <a
+                    className={styles.linkButton}
+                    href={content.meetNuvaUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Globe2 size={18} aria-hidden="true" />
+                    代表作品
+                    <ExternalLink size={14} aria-hidden="true" />
+                  </a>
+                  {content.linkedinUrl ? (
+                    <a
+                      className={styles.linkButton}
+                      href={content.linkedinUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Contact size={18} aria-hidden="true" />
+                      個人經歷
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <span className={styles.pendingLink}>
+                      <Contact size={18} aria-hidden="true" />
+                      個人經歷待補
+                    </span>
+                  )}
+                </div>
+
               </section>
+
+              <form
+                className={styles.form}
+                id="rsvp"
+                onSubmit={submitRegistration}
+                ref={formRef}
+              >
+                <div className={styles.formHeader}>
+                  <div>
+                    <p className={styles.eyebrow}>RSVP</p>
+                    <h2>保留席次與兌換券</h2>
+                  </div>
+                  <span className={styles.formBadge}>快速報名</span>
+                </div>
+                <p className={styles.formBenefit}>
+                  來賓與引薦人皆可兌換 2026 任一付費線上工作坊，或一小時 AI 諮詢服務。
+                </p>
+                <div className={styles.formGrid}>
+                  <label className={styles.field} htmlFor="registration-name">
+                    <span>
+                      <UserRound size={16} aria-hidden="true" />
+                      報名姓名
+                    </span>
+                    <input
+                      id="registration-name"
+                      aria-label="報名姓名"
+                      value={form.name}
+                      onChange={updateField("name")}
+                      autoComplete="name"
+                      placeholder="你的姓名"
+                      required
+                    />
+                  </label>
+                  <label className={styles.field} htmlFor="registration-line">
+                    <span>
+                      <MessageCircle size={16} aria-hidden="true" />
+                      LINE ID
+                    </span>
+                    <input
+                      id="registration-line"
+                      aria-label="LINE ID"
+                      value={form.lineId}
+                      onChange={updateField("lineId")}
+                      placeholder="LINE ID"
+                      required
+                    />
+                  </label>
+                  <label
+                    className={`${styles.field} ${styles.fieldWide}`}
+                    htmlFor="registration-email"
+                  >
+                    <span>
+                      <Mail size={16} aria-hidden="true" />
+                      Email
+                    </span>
+                    <input
+                      id="registration-email"
+                      aria-label="Email"
+                      value={form.email}
+                      onChange={updateField("email")}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="name@example.com"
+                      required
+                    />
+                    <small className={styles.fieldHint}>
+                      報名確認與兌換券會寄到這個信箱。
+                    </small>
+                  </label>
+                  <label
+                    className={`${styles.field} ${styles.fieldWide}`}
+                    htmlFor="registration-referrer"
+                  >
+                    <span>引薦人</span>
+                    <input
+                      id="registration-referrer"
+                      aria-label="引薦人"
+                      value={form.referrerName}
+                      onChange={updateField("referrerName")}
+                      placeholder="可留空"
+                    />
+                  </label>
+                </div>
+                <button
+                  className={styles.submitButton}
+                  disabled={submitState === "submitting"}
+                  type="submit"
+                >
+                  <Ticket size={18} aria-hidden="true" />
+                  {submitState === "submitting" ? "送出中" : "完成報名"}
+                </button>
+                {message ? (
+                  <p
+                    aria-live="polite"
+                    className={
+                      submitState === "error" ? styles.errorMessage : styles.successMessage
+                    }
+                  >
+                    {message}
+                  </p>
+                ) : null}
+              </form>
 
               <section className={styles.detailBlock}>
                 <p>{content.description}</p>
@@ -393,123 +530,6 @@ export function InvitationExperience({
                   </div>
                 </dl>
               </section>
-
-              <div className={styles.linkRow}>
-                <a
-                  className={styles.linkButton}
-                  href={content.meetNuvaUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Globe2 size={18} aria-hidden="true" />
-                  meetnuva.com
-                  <ExternalLink size={14} aria-hidden="true" />
-                </a>
-                {content.linkedinUrl ? (
-                  <a
-                    className={styles.linkButton}
-                    href={content.linkedinUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Contact size={18} aria-hidden="true" />
-                    LinkedIn
-                    <ExternalLink size={14} aria-hidden="true" />
-                  </a>
-                ) : (
-                  <span className={styles.pendingLink}>
-                    <Contact size={18} aria-hidden="true" />
-                    LinkedIn 待補
-                  </span>
-                )}
-              </div>
-
-              <form
-                className={styles.form}
-                id="rsvp"
-                onSubmit={submitRegistration}
-                ref={formRef}
-              >
-                <div className={styles.formHeader}>
-                  <p className={styles.eyebrow}>RSVP</p>
-                  <h2>保留席次與兌換券</h2>
-                </div>
-                <label htmlFor="registration-name">
-                  <span>
-                    <UserRound size={16} aria-hidden="true" />
-                    報名姓名
-                  </span>
-                  <input
-                    id="registration-name"
-                    aria-label="報名姓名"
-                    value={form.name}
-                    onChange={updateField("name")}
-                    autoComplete="name"
-                    required
-                  />
-                </label>
-                <label htmlFor="registration-line">
-                  <span>
-                    <MessageCircle size={16} aria-hidden="true" />
-                    LINE ID
-                  </span>
-                  <input
-                    id="registration-line"
-                    aria-label="LINE ID"
-                    value={form.lineId}
-                    onChange={updateField("lineId")}
-                    required
-                  />
-                  <small className={styles.fieldHint}>
-                    用於活動前聯繫與報到確認。
-                  </small>
-                </label>
-                <label htmlFor="registration-email">
-                  <span>
-                    <Mail size={16} aria-hidden="true" />
-                    Email
-                  </span>
-                  <input
-                    id="registration-email"
-                    aria-label="Email"
-                    value={form.email}
-                    onChange={updateField("email")}
-                    type="email"
-                    autoComplete="email"
-                    required
-                  />
-                  <small className={styles.fieldHint}>
-                    會寄送報名確認與兌換券資訊。
-                  </small>
-                </label>
-                <label htmlFor="registration-referrer">
-                  <span>引薦人</span>
-                  <input
-                    id="registration-referrer"
-                    aria-label="引薦人"
-                    value={form.referrerName}
-                    onChange={updateField("referrerName")}
-                  />
-                </label>
-                <button
-                  className={styles.submitButton}
-                  disabled={submitState === "submitting"}
-                  type="submit"
-                >
-                  <Ticket size={18} aria-hidden="true" />
-                  {submitState === "submitting" ? "送出中" : "完成報名"}
-                </button>
-                {message ? (
-                  <p
-                    aria-live="polite"
-                    className={
-                      submitState === "error" ? styles.errorMessage : styles.successMessage
-                    }
-                  >
-                    {message}
-                  </p>
-                ) : null}
-              </form>
 
               {coupon ? (
                 <motion.section
