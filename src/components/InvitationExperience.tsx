@@ -407,129 +407,133 @@ export function InvitationExperience({
 
               </section>
 
-              <form
-                className={styles.form}
-                id="rsvp"
-                onSubmit={submitRegistration}
-                ref={formRef}
-              >
-                <div className={styles.formHeader}>
-                  <div>
-                    <p className={styles.eyebrow}>RSVP</p>
-                    <h2>保留席次與兌換券</h2>
-                  </div>
-                  <span className={styles.formBadge}>快速報名</span>
-                </div>
-                <p className={styles.formBenefit}>
-                  來賓與引薦人皆可兌換 2026 任一付費線上工作坊，或一小時 AI 諮詢服務。
-                </p>
-                <div className={styles.formGrid}>
-                  <label className={styles.field} htmlFor="registration-name">
-                    <span>
-                      <UserRound size={16} aria-hidden="true" />
-                      報名姓名
-                    </span>
-                    <input
-                      id="registration-name"
-                      aria-label="報名姓名"
-                      value={form.name}
-                      onChange={updateField("name")}
-                      autoComplete="name"
-                      placeholder="你的姓名"
-                      required
-                    />
-                  </label>
-                  <label className={styles.field} htmlFor="registration-line">
-                    <span>
-                      <MessageCircle size={16} aria-hidden="true" />
-                      LINE ID
-                    </span>
-                    <input
-                      id="registration-line"
-                      aria-label="LINE ID"
-                      value={form.lineId}
-                      onChange={updateField("lineId")}
-                      placeholder="LINE ID"
-                      required
-                    />
-                  </label>
-                  <label
-                    className={`${styles.field} ${styles.fieldWide}`}
-                    htmlFor="registration-email"
+              {!coupon ? (
+                <>
+                  <form
+                    className={styles.form}
+                    id="rsvp"
+                    onSubmit={submitRegistration}
+                    ref={formRef}
                   >
-                    <span>
-                      <Mail size={16} aria-hidden="true" />
-                      Email
-                    </span>
-                    <input
-                      id="registration-email"
-                      aria-label="Email"
-                      value={form.email}
-                      onChange={updateField("email")}
-                      type="email"
-                      autoComplete="email"
-                      placeholder="name@example.com"
-                      required
-                    />
-                    <small className={styles.fieldHint}>
-                      報名確認與兌換券會寄到這個信箱。
-                    </small>
-                  </label>
-                  <label
-                    className={`${styles.field} ${styles.fieldWide}`}
-                    htmlFor="registration-referrer"
-                  >
-                    <span>引薦人</span>
-                    <input
-                      id="registration-referrer"
-                      aria-label="引薦人"
-                      value={form.referrerName}
-                      onChange={updateField("referrerName")}
-                      placeholder="可留空"
-                    />
-                  </label>
-                </div>
-                <button
-                  className={styles.submitButton}
-                  disabled={submitState === "submitting"}
-                  type="submit"
-                >
-                  <Ticket size={18} aria-hidden="true" />
-                  {submitState === "submitting" ? "送出中" : "完成報名"}
-                </button>
-                {message ? (
-                  <p
-                    aria-live="polite"
-                    className={
-                      submitState === "error" ? styles.errorMessage : styles.successMessage
-                    }
-                  >
-                    {message}
-                  </p>
-                ) : null}
-              </form>
+                    <div className={styles.formHeader}>
+                      <div>
+                        <p className={styles.eyebrow}>RSVP</p>
+                        <h2>保留席次與兌換券</h2>
+                      </div>
+                      <span className={styles.formBadge}>快速報名</span>
+                    </div>
+                    <p className={styles.formBenefit}>
+                      來賓與引薦人皆可兌換 2026 任一付費線上工作坊，或一小時 AI 諮詢服務。
+                    </p>
+                    <div className={styles.formGrid}>
+                      <label className={styles.field} htmlFor="registration-name">
+                        <span>
+                          <UserRound size={16} aria-hidden="true" />
+                          報名姓名
+                        </span>
+                        <input
+                          id="registration-name"
+                          aria-label="報名姓名"
+                          value={form.name}
+                          onChange={updateField("name")}
+                          autoComplete="name"
+                          placeholder="你的姓名"
+                          required
+                        />
+                      </label>
+                      <label className={styles.field} htmlFor="registration-line">
+                        <span>
+                          <MessageCircle size={16} aria-hidden="true" />
+                          LINE ID
+                        </span>
+                        <input
+                          id="registration-line"
+                          aria-label="LINE ID"
+                          value={form.lineId}
+                          onChange={updateField("lineId")}
+                          placeholder="LINE ID"
+                          required
+                        />
+                      </label>
+                      <label
+                        className={`${styles.field} ${styles.fieldWide}`}
+                        htmlFor="registration-email"
+                      >
+                        <span>
+                          <Mail size={16} aria-hidden="true" />
+                          Email
+                        </span>
+                        <input
+                          id="registration-email"
+                          aria-label="Email"
+                          value={form.email}
+                          onChange={updateField("email")}
+                          type="email"
+                          autoComplete="email"
+                          placeholder="name@example.com"
+                          required
+                        />
+                        <small className={styles.fieldHint}>
+                          報名確認與兌換券會寄到這個信箱。
+                        </small>
+                      </label>
+                      <label
+                        className={`${styles.field} ${styles.fieldWide}`}
+                        htmlFor="registration-referrer"
+                      >
+                        <span>引薦人</span>
+                        <input
+                          id="registration-referrer"
+                          aria-label="引薦人"
+                          value={form.referrerName}
+                          onChange={updateField("referrerName")}
+                          placeholder="可留空"
+                        />
+                      </label>
+                    </div>
+                    <button
+                      className={styles.submitButton}
+                      disabled={submitState === "submitting"}
+                      type="submit"
+                    >
+                      <Ticket size={18} aria-hidden="true" />
+                      {submitState === "submitting" ? "送出中" : "完成報名"}
+                    </button>
+                    {message ? (
+                      <p
+                        aria-live="polite"
+                        className={
+                          submitState === "error" ? styles.errorMessage : styles.successMessage
+                        }
+                      >
+                        {message}
+                      </p>
+                    ) : null}
+                  </form>
 
-              <section className={styles.detailBlock}>
-                <p>{content.description}</p>
-                <dl>
-                  <div>
-                    <dt>地點</dt>
-                    <dd>
-                      {content.locationName}
-                      <br />
-                      {content.locationAddress}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>費用</dt>
-                    <dd>{content.fee}</dd>
-                  </div>
-                  <div>
-                    <dt>引薦對象</dt>
-                    <dd>{content.referralAudience}</dd>
-                  </div>
-                </dl>
-              </section>
+                  <section className={styles.detailBlock}>
+                    <p>{content.description}</p>
+                    <dl>
+                      <div>
+                        <dt>地點</dt>
+                        <dd>
+                          {content.locationName}
+                          <br />
+                          {content.locationAddress}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>費用</dt>
+                        <dd>{content.fee}</dd>
+                      </div>
+                      <div>
+                        <dt>引薦對象</dt>
+                        <dd>{content.referralAudience}</dd>
+                      </div>
+                    </dl>
+                  </section>
+                </>
+              ) : null}
 
               {coupon ? (
                 <motion.section
@@ -566,7 +570,7 @@ export function InvitationExperience({
                   <span className={styles.couponStatus}>
                     <CheckCircle2 size={16} aria-hidden="true" />
                     {coupon.emailConfigured && coupon.attendeeEmailSent
-                      ? "確認信已寄出"
+                      ? "已將活動詳細資訊寄送到信箱"
                       : "兌換券已建立"}
                   </span>
                 </motion.section>
