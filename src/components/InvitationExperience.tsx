@@ -316,7 +316,7 @@ export function InvitationExperience({
           >
             <section className={styles.posterColumn} aria-label="活動海報">
               <div className={styles.posterToolbar}>
-                <div>
+                <div className={styles.posterToolbarText}>
                   <p>{content.chapterName}</p>
                   <h1>{content.eventTitle}</h1>
                 </div>
