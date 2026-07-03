@@ -1,0 +1,210 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal {
+  background: #ffffff;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.langToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.langBtn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.langBtn:hover {
+  color: #333;
+}
+
+.langBtn.active {
+  color: #CF2030;
+  font-weight: 700;
+}
+
+.divider {
+  color: #ccc;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.closeBtn:hover {
+  background: #eee;
+}
+
+.content {
+  padding: 32px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.profileHeader {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.avatarWrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 3px solid #fbdcde;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileTitles h2 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  color: #111;
+}
+
+.headline {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+}
+
+.company {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #111;
+  border-bottom: 2px solid #fbdcde;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.aboutText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+  white-space: pre-line;
+}
+
+.experienceList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.experienceItem {
+  display: flex;
+  gap: 16px;
+}
+
+.expDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #CF2030;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.expDetails h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: #222;
+}
+
+.expCompany {
+  margin: 0;
+  font-size: 14px;
+  color: #777;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section h3 {
+    width: 100%;
+    text-align: center;
+  }
+}

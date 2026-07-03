@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type FormEvent,
   type PointerEvent,
+  type SubmitEvent,
 } from "react";
 import confetti from "canvas-confetti";
 import {
@@ -27,7 +27,6 @@ import {
   ChevronDown,
   Clock3,
   Contact,
-  Copy,
   ExternalLink,
   Lightbulb,
   Mail,
@@ -40,7 +39,9 @@ import {
   X,
   ZoomIn,
 } from "lucide-react";
+import { BorderBeam } from "@/components/BorderBeam";
 import type { InvitationContent } from "@/lib/invitation-content";
+import SpeakerProfileModal from "./SpeakerProfileModal";
 import styles from "./InvitationExperience.module.css";
 
 type FormState = {
@@ -178,16 +179,15 @@ export function InvitationExperience({
   const [opened, setOpened] = useState(false);
   const [opening, setOpening] = useState(false);
   const [posterFocused, setPosterFocused] = useState(false);
+  const [speakerModalOpen, setSpeakerModalOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [message, setMessage] = useState("");
   const [coupon, setCoupon] = useState<CouponState | null>(null);
-  const [copied, setCopied] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const couponRef = useRef<HTMLElement | null>(null);
   const openingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReduceMotion = useReducedMotion();
   const isRegistered = Boolean(coupon);
   const calendarLinks = useMemo(() => buildCalendarLinks(content), [content]);
@@ -254,9 +254,6 @@ export function InvitationExperience({
       if (openingTimerRef.current) {
         clearTimeout(openingTimerRef.current);
       }
-      if (copyTimerRef.current) {
-        clearTimeout(copyTimerRef.current);
-      }
     };
   }, []);
 
@@ -269,7 +266,7 @@ export function InvitationExperience({
     };
   }
 
-  async function submitRegistration(event: React.FormEvent<HTMLFormElement>) {
+  async function submitRegistration(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitState("submitting");
     setMessage("");
@@ -341,13 +338,9 @@ export function InvitationExperience({
     event.currentTarget.style.removeProperty("--letter-glow-y");
   }
 
-  function openLinkedinPopup(event: React.MouseEvent<HTMLAnchorElement>, url: string) {
+  function openSpeakerProfile(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
-    const width = 800;
-    const height = 900;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-    window.open(url, "linkedinPopup", `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+    setSpeakerModalOpen(true);
   }
 
   function openInvitation() {
@@ -364,20 +357,6 @@ export function InvitationExperience({
     openingTimerRef.current = setTimeout(() => {
       setOpened(true);
     }, 1760);
-  }
-
-  async function copyCouponCode(code: string) {
-    try {
-      await navigator.clipboard.writeText(code);
-      toast.success("兌換碼已複製。");
-      setCopied(true);
-      if (copyTimerRef.current) {
-        clearTimeout(copyTimerRef.current);
-      }
-      copyTimerRef.current = setTimeout(() => setCopied(false), 1900);
-    } catch {
-      toast.error("無法複製兌換碼，請手動選取。");
-    }
   }
 
   function registerAnotherAttendee() {
@@ -540,9 +519,9 @@ export function InvitationExperience({
                       {content.linkedinUrl ? (
                         <a
                           className={`${styles.linkButton} ${styles.tooltipTarget}`}
-                          data-tooltip="開啟 LinkedIn"
-                          href={content.linkedinUrl}
-                          onClick={(e) => openLinkedinPopup(e, content.linkedinUrl)}
+                          data-tooltip="查看個人經歷"
+                          href="#"
+                          onClick={openSpeakerProfile}
                         >
                           <Contact size={18} aria-hidden="true" />
                           個人經歷
@@ -648,6 +627,7 @@ export function InvitationExperience({
                     >
                       <Ticket size={18} aria-hidden="true" />
                       {submitState === "submitting" ? "送出中" : "完成報名"}
+                      <BorderBeam size={44} duration={7} />
                     </button>
                     {message ? (
                       <p
@@ -728,23 +708,24 @@ export function InvitationExperience({
                   <p className={styles.receiptMeta}>
                     {content.eventDate} · {content.eventTime} · {content.locationName}
                   </p>
-                  <button
-                    aria-label={`複製兌換碼 ${coupon.code}`}
-                    className={`${styles.copyCodeButton} ${styles.tooltipTarget}`}
-                    data-copied={copied ? "true" : "false"}
-                    data-tooltip="複製兌換碼"
-                    onClick={() => copyCouponCode(coupon.code)}
-                    type="button"
+                  <div
+                    aria-label={`兌換碼 ${coupon.code}`}
+                    className={styles.copyCodeButton}
                   >
                     <span>兌換碼</span>
                     <strong>{coupon.code}</strong>
-                    <span className={styles.copyLabel}>{copied ? "已複製" : "複製"}</span>
-                    {copied ? (
-                      <Check size={16} aria-hidden="true" />
+                    {coupon.emailConfigured && coupon.attendeeEmailSent ? (
+                      <>
+                        <span className={styles.copyLabel}>已寄至信箱</span>
+                        <CheckCircle2 size={16} aria-hidden="true" />
+                      </>
                     ) : (
-                      <Copy size={16} aria-hidden="true" />
+                      <>
+                        <span className={styles.copyLabel}>已建立</span>
+                        <Check size={16} aria-hidden="true" />
+                      </>
                     )}
-                  </button>
+                  </div>
                   <p className={styles.receiptBenefit}>
                     可兌換 2026 付費線上工作坊，或 1 小時 AI 諮詢服務。
                   </p>
@@ -822,8 +803,8 @@ export function InvitationExperience({
                           {content.linkedinUrl ? (
                             <a
                               className={styles.linkButton}
-                              href={content.linkedinUrl}
-                              onClick={(e) => openLinkedinPopup(e, content.linkedinUrl)}
+                              href="#"
+                              onClick={openSpeakerProfile}
                             >
                               <Contact size={18} aria-hidden="true" />
                               個人經歷
@@ -929,14 +910,13 @@ export function InvitationExperience({
             >
               <span className={styles.loadingHalo} aria-hidden="true" />
               <motion.span
-                className={styles.loadingIcon}
-                aria-hidden="true"
-                animate={
+                className={styles.loadingIconBox}
+                animate={shouldReduceMotion ? undefined : { rotate: [0, -10, 10, -10, 0] }}
+                transition={
                   shouldReduceMotion
                     ? undefined
-                    : { y: [0, -9, 0], rotate: [-7, 7, -7] }
+                    : { repeat: Infinity, duration: 2, ease: "easeInOut" }
                 }
-                transition={{ duration: 1.7, repeat: Infinity, ease: "easeInOut" }}
               >
                 <Lightbulb size={30} aria-hidden="true" />
               </motion.span>
@@ -951,6 +931,12 @@ export function InvitationExperience({
           </motion.div>
         ) : null}
       </AnimatePresence>
+
+      <SpeakerProfileModal
+        isOpen={speakerModalOpen}
+        onClose={() => setSpeakerModalOpen(false)}
+        speakerImageUrl={content.posterImagePath}
+      />
     </main>
   );
 }

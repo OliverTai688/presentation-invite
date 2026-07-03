@@ -776,6 +776,7 @@
 }
 
 .submitButton {
+  position: relative;
   min-height: 54px;
   gap: 9px;
   background:
@@ -1145,6 +1146,7 @@
   font-size: 0.82rem;
   font-weight: 850;
   padding: 0 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 .compactChipGrid svg {
