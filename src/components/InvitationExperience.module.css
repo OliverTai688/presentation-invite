@@ -1484,6 +1484,24 @@
     background: rgb(255 255 255 / 0.9);
   }
 
+  .ticketMain,
+  .ticketStub {
+    padding: 16px 16px;
+  }
+
+  .ticketTear {
+    height: 28px;
+  }
+
+  .ticketTearLine {
+    left: 20px;
+    right: 20px;
+  }
+
+  .ticketWelcome {
+    font-size: 0.96rem;
+  }
+
   .receiptHeader {
     align-items: flex-start;
   }
@@ -1780,5 +1798,124 @@
   }
   50% {
     background-position: 100% 50%;
+  }
+}
+
+/* ==========================================================================
+   Success ticket — the coupon renders as a literal event ticket: a main
+   body + a perforated tear row + a detachable stub holding the code and a
+   warm "期待與您交流" welcome line. Notches are cut with mask-image radial
+   gradients (real transparency, so they read correctly over the moving
+   mesh-gradient background) rather than color-matched circles.
+   ========================================================================== */
+
+.ticketCard {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  border-radius: 16px;
+  box-shadow:
+    0 26px 60px -24px rgb(20 26 40 / 0.32),
+    0 1px 0 rgb(255 255 255 / 0.5) inset;
+}
+
+.ticketMain,
+.ticketStub {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+}
+
+.ticketMain {
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(160deg, #fffdf8 0%, #fbf1e8 100%);
+}
+
+.ticketStub {
+  border-radius: 0 0 16px 16px;
+  background:
+    linear-gradient(160deg, rgb(200 16 46 / 0.08), transparent 60%),
+    #fdf6ee;
+}
+
+.ticketTear {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 34px;
+  background: #fbf1e8;
+}
+
+.ticketTearLine {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 50%;
+  height: 0;
+  border-top: 2px dashed rgb(30 38 52 / 0.24);
+  transform: translateY(-50%);
+}
+
+.ticketSealBadge {
+  position: relative;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgb(30 38 52 / 0.14);
+  background: #fffdf8;
+  color: var(--ink-subtle);
+  box-shadow: 0 2px 6px rgb(20 26 40 / 0.14);
+}
+
+.ticketWelcome {
+  color: var(--brand-strong);
+  font-family: var(--font-serif-tc);
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.ticketStub .copyCodeButton {
+  margin-top: 2px;
+}
+
+@supports (
+  (mask-image: radial-gradient(#000, #000)) or
+    (-webkit-mask-image: radial-gradient(#000, #000))
+) {
+  .ticketMain {
+    -webkit-mask-image:
+      radial-gradient(circle at 0 100%, transparent 0 12px, #000 12.75px),
+      radial-gradient(circle at 100% 100%, transparent 0 12px, #000 12.75px);
+    mask-image:
+      radial-gradient(circle at 0 100%, transparent 0 12px, #000 12.75px),
+      radial-gradient(circle at 100% 100%, transparent 0 12px, #000 12.75px);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 51% 100%, 51% 100%;
+    mask-size: 51% 100%, 51% 100%;
+    -webkit-mask-position: left, right;
+    mask-position: left, right;
+  }
+
+  .ticketStub {
+    -webkit-mask-image:
+      radial-gradient(circle at 0 0, transparent 0 12px, #000 12.75px),
+      radial-gradient(circle at 100% 0, transparent 0 12px, #000 12.75px);
+    mask-image:
+      radial-gradient(circle at 0 0, transparent 0 12px, #000 12.75px),
+      radial-gradient(circle at 100% 0, transparent 0 12px, #000 12.75px);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 51% 100%, 51% 100%;
+    mask-size: 51% 100%, 51% 100%;
+    -webkit-mask-position: left, right;
+    mask-position: left, right;
   }
 }

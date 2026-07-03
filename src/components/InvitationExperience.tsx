@@ -32,6 +32,7 @@ import {
   Mail,
   MapPin,
   MessageCircle,
+  Scissors,
   Sparkles,
   Ticket,
   UserPlus,
@@ -84,79 +85,7 @@ const panelItem: Variants = {
   },
 };
 
-type CalendarLinks = { google: string; ics: string };
-
-function pad(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function escapeIcsText(value: string) {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,")
-    .replace(/\r?\n/g, "\\n");
-}
-
-// Content fields are free-text (admin-editable), so parse defensively and
-// only surface calendar links when a date can be recovered.
-function buildCalendarLinks(content: InvitationContent): CalendarLinks | null {
-  const date = content.eventDate.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
-  if (!date) {
-    return null;
-  }
-
-  const [, year, month, day] = date;
-  let startHour = 9;
-  let startMinute = 0;
-  let endHour = 10;
-  let endMinute = 0;
-
-  const time = content.eventTime.match(/(\d{1,2}):(\d{2})\D+(\d{1,2}):(\d{2})/);
-  if (time) {
-    startHour = Number(time[1]);
-    startMinute = Number(time[2]);
-    endHour = Number(time[3]);
-    endMinute = Number(time[4]);
-    if (/pm|下午/i.test(content.eventTime) && startHour < 12) {
-      startHour += 12;
-      endHour += 12;
-    }
-  }
-
-  const day8 = `${year}${pad(Number(month))}${pad(Number(day))}`;
-  const start = `${day8}T${pad(startHour)}${pad(startMinute)}00`;
-  const end = `${day8}T${pad(endHour)}${pad(endMinute)}00`;
-  const title = `${content.chapterName}｜${content.eventTitle}`;
-  const details = content.description;
-  const location = `${content.locationName} ${content.locationAddress}`.trim();
-
-  const google =
-    "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-    `&text=${encodeURIComponent(title)}` +
-    `&dates=${start}/${end}` +
-    `&details=${encodeURIComponent(details)}` +
-    `&location=${encodeURIComponent(location)}`;
-
-  const icsBody = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//BNI Invitation//TW//",
-    "BEGIN:VEVENT",
-    `UID:bni-${day8}@meetnuva.com`,
-    `DTSTART:${start}`,
-    `DTEND:${end}`,
-    `SUMMARY:${escapeIcsText(title)}`,
-    `DESCRIPTION:${escapeIcsText(details)}`,
-    `LOCATION:${escapeIcsText(location)}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-
-  const ics = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsBody)}`;
-
-  return { google, ics };
-}
+import { buildCalendarLinks } from "@/lib/calendar";
 
 // The event title carries "主標｜副標" — split on the full/half-width bar so
 // the hero can render a strong main title with a lighter subtitle beneath it.
@@ -427,6 +356,7 @@ export function InvitationExperience({
                       width={1076}
                       height={1522}
                       sizes="(max-width: 760px) 42vw, 240px"
+                      priority
                     />
                   </span>
                   <span className={styles.envelopeBack} />
@@ -691,48 +621,65 @@ export function InvitationExperience({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: shouldReduceMotion ? 0 : 0.28, ease: "easeOut" }}
                 >
-                  <div className={styles.receiptHeader}>
-                    <span className={styles.receiptIcon}>
-                      <CheckCircle2 size={22} aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className={styles.eyebrow}>報名完成</p>
-                      <h2>{coupon.title}</h2>
+                  <div className={styles.ticketCard}>
+                    <div className={styles.ticketMain}>
+                      <div className={styles.receiptHeader}>
+                        <span className={styles.receiptIcon}>
+                          <CheckCircle2 size={22} aria-hidden="true" />
+                        </span>
+                        <div>
+                          <p className={styles.eyebrow}>報名完成</p>
+                          <h2>{coupon.title}</h2>
+                        </div>
+                      </div>
+                      <p className={styles.receiptStatus}>
+                        {coupon.emailConfigured && coupon.attendeeEmailSent
+                          ? "活動資訊已寄到信箱"
+                          : "兌換券已建立"}
+                      </p>
+                      <p className={styles.receiptMeta}>
+                        {content.eventDate} · {content.eventTime} · {content.locationName}
+                      </p>
+                      <p className={styles.receiptBenefit}>
+                        可兌換 2026 付費線上工作坊，或 1 小時 AI 諮詢服務。
+                      </p>
+                      <p className={styles.receiptApplies}>
+                        <BadgeCheck size={16} aria-hidden="true" />
+                        來賓與引薦人皆適用
+                      </p>
+                    </div>
+
+                    <div className={styles.ticketTear} aria-hidden="true">
+                      <span className={styles.ticketTearLine} />
+                      <span className={styles.ticketSealBadge}>
+                        <Scissors size={12} aria-hidden="true" />
+                      </span>
+                    </div>
+
+                    <div className={styles.ticketStub}>
+                      <p className={styles.ticketWelcome}>
+                        期待與您交流，祝您賓至如歸。
+                      </p>
+                      <div
+                        aria-label={`兌換碼 ${coupon.code}`}
+                        className={styles.copyCodeButton}
+                      >
+                        <span>兌換碼</span>
+                        <strong>{coupon.code}</strong>
+                        {coupon.emailConfigured && coupon.attendeeEmailSent ? (
+                          <>
+                            <span className={styles.copyLabel}>已寄至信箱</span>
+                            <CheckCircle2 size={16} aria-hidden="true" />
+                          </>
+                        ) : (
+                          <>
+                            <span className={styles.copyLabel}>已建立</span>
+                            <Check size={16} aria-hidden="true" />
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <p className={styles.receiptStatus}>
-                    {coupon.emailConfigured && coupon.attendeeEmailSent
-                      ? "活動資訊已寄到信箱"
-                      : "兌換券已建立"}
-                  </p>
-                  <p className={styles.receiptMeta}>
-                    {content.eventDate} · {content.eventTime} · {content.locationName}
-                  </p>
-                  <div
-                    aria-label={`兌換碼 ${coupon.code}`}
-                    className={styles.copyCodeButton}
-                  >
-                    <span>兌換碼</span>
-                    <strong>{coupon.code}</strong>
-                    {coupon.emailConfigured && coupon.attendeeEmailSent ? (
-                      <>
-                        <span className={styles.copyLabel}>已寄至信箱</span>
-                        <CheckCircle2 size={16} aria-hidden="true" />
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.copyLabel}>已建立</span>
-                        <Check size={16} aria-hidden="true" />
-                      </>
-                    )}
-                  </div>
-                  <p className={styles.receiptBenefit}>
-                    可兌換 2026 付費線上工作坊，或 1 小時 AI 諮詢服務。
-                  </p>
-                  <p className={styles.receiptApplies}>
-                    <BadgeCheck size={16} aria-hidden="true" />
-                    來賓與引薦人皆適用
-                  </p>
                   <div className={styles.receiptActions}>
                     <button
                       className={styles.nextRegistrationButton}

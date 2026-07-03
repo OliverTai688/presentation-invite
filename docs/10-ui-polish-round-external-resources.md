@@ -59,6 +59,17 @@
 
 待人工視覺 QA：主標漸層 sheen 節奏、CJK 換行是否孤字、Border Beam 在玻璃 CTA 上的可見度。
 
+## 追加：報名成功卡改為實體票券樣式（使用者指定）
+
+使用者要求報名成功卡改成「像一張票券」，並加上「期待與您交流」的溫暖訊息讓來賓感受賓至如歸。派 subagent 研究票券/登機證 CSS 手法（不裝套件），結論採用 `mask-image` 雙 radial-gradient 缺口（而非顏色相符的圓點），因為背景是會移動的 WebGL mesh-gradient，只有真正的透明鏤空才能在任何背景狀態下正確顯示。
+
+- **結構**：`successReceipt` 內新增 `ticketCard`（`ticketMain` 主聯 + `ticketTear` 撕線列 + `ticketStub` 存根），取代原本扁平堆疊的 receipt 元素。主聯保留報名狀態/日期/福利說明；存根放兌換碼 + 新增的「期待與您交流，祝您賓至如歸。」歡迎句（`Noto Serif TC`，緋紅字）。
+- **缺口做法**：`ticketMain` 只在自身底邊鏤空、`ticketStub` 只在自身頂邊鏤空——各自相對自己的邊界定位，不受動態內容高度影響，避免要用 JS 量測撕線的 Y 座標。用 `mask-size:51% 100%` 雙圖層各佔一半寬度（而非 `mask-composite:intersect`），相容性更好，包在 `@supports` 裡優雅降級（不支援時仍是正常圓角票卡，只是沒有鏤空圓點)。
+- **撕線列**：`ticketTear` 是介於主聯與存根之間的獨立小列（非絕對定位疊加在遮罩元素上），裡面放虛線 + 剪刀圖示徽章（`lucide-react` 的 `Scissors`，已確認存在），避免了「徽章疊在遮罩元素邊界上可能被裁切」的邊界情況。
+- **視覺區隔**：票券本體用近不透明「紙感」白/米色，跟外層玻璃殼形成對比（紙票夾在玻璃資料夾裡的感覺）；存根用極淡緋紅色調，暗示「這是你要保留的部分」。
+
+待人工視覺 QA：此環境沒有 headless 瀏覽器，無法截圖確認缺口/撕線實際渲染效果，需要人工在瀏覽器檢查（尤其 Safari 的 mask 相容性）與行動裝置寬度下的間距。
+
 ## 參考來源
 
 - Luma / Partiful RSVP patterns、add-to-calendar：party.pro、calendarlink.com

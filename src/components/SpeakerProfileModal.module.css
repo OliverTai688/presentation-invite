@@ -183,6 +183,27 @@
   color: #777;
 }
 
+.expPeriod {
+  margin: 2px 0 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #cf2030;
+}
+
+.expHighlights {
+  margin: 8px 0 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.expHighlights li {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #555;
+}
+
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .overlay {

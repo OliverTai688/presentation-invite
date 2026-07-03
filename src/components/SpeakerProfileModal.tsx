@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Globe } from "lucide-react";
 import Image from "next/image";
@@ -94,12 +94,41 @@ export default function SpeakerProfileModal({ isOpen, onClose, speakerImageUrl }
                       <div className={styles.expDot} />
                       <div className={styles.expDetails}>
                         <h4 className={styles.expTitle}>{exp.title}</h4>
-                        <p className={styles.expCompany}>{exp.company}</p>
+                        <p className={styles.expCompany}>
+                          {exp.company}
+                          {exp.location ? ` · ${exp.location}` : ""}
+                        </p>
+                        <p className={styles.expPeriod}>{exp.period}</p>
+                        {exp.highlights?.length ? (
+                          <ul className={styles.expHighlights}>
+                            {exp.highlights.map((highlight, hIdx) => (
+                              <li key={hIdx}>{highlight}</li>
+                            ))}
+                          </ul>
+                        ) : null}
                       </div>
                     </li>
                   ))}
                 </ul>
               </div>
+
+              {profile.education?.length ? (
+                <div className={styles.section}>
+                  <h3>{lang === "zh" ? "學歷" : "Education"}</h3>
+                  <ul className={styles.experienceList}>
+                    {profile.education.map((edu, idx) => (
+                      <li key={idx} className={styles.experienceItem}>
+                        <div className={styles.expDot} />
+                        <div className={styles.expDetails}>
+                          <h4 className={styles.expTitle}>{edu.school}</h4>
+                          <p className={styles.expCompany}>{edu.degree}</p>
+                          <p className={styles.expPeriod}>{edu.period}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           </motion.div>
         </div>
