@@ -339,7 +339,7 @@ export function attendeeHtml(content: InvitationContent, registration: Registrat
                 <p class="coupon-desc">${escapeHtml(content.couponDescription)}</p>
                 <table class="ticket" role="presentation" align="center">
                   <tr>
-                    <td class="ticket-welcome">期待與您交流，祝您賓至如歸。</td>
+                    <td class="ticket-welcome">期待與您交流，祝您商運亨通。</td>
                   </tr>
                   <tr>
                     <td class="ticket-tear"><hr></td>
