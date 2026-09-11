@@ -1,4 +1,5 @@
-import { getRegistrations } from "@/lib/storage";
+import { getInvitationContent } from "@/lib/storage";
+import { getSystemStatus } from "@/lib/system-status";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,7 @@ export async function GET(request: Request) {
   if (!checkAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const registrations = await getRegistrations();
-  return Response.json({ registrations });
+  const content = await getInvitationContent();
+  const status = getSystemStatus(content);
+  return Response.json(status);
 }

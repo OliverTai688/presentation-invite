@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 
+export const runtime = "edge";
+
 export const size = {
   width: 64,
   height: 64,
@@ -73,13 +75,13 @@ export default function Icon() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 19,
+            fontSize: 15,
             fontWeight: 900,
             lineHeight: 1,
             letterSpacing: 0,
           }}
         >
-          AI
+          BNI
         </div>
       </div>
     ),

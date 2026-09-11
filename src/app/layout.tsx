@@ -1,69 +1,62 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
+import { Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 import { AppToaster } from "@/components/AppToaster";
-import { SiteBackground } from "@/components/SiteBackground";
-import { defaultInvitationContent } from "@/lib/invitation-content";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSansTc = Noto_Sans_TC({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// Traditional-Chinese UI/body face. Self-hosted by next/font; loaded async
-// (preload disabled) so the large CJK file never blocks first paint — the
-// system PingFang/JhengHei fallback shows until it swaps in.
-const notoSansTC = Noto_Sans_TC({
-  variable: "--font-noto-sans-tc",
   weight: ["400", "500", "700", "900"],
+  variable: "--font-noto-sans-tc",
   display: "swap",
-  preload: false,
 });
 
-// Elegant serif reserved for the hero main title (主標) only.
-const notoSerifTC = Noto_Serif_TC({
+const notoSerifTc = Noto_Serif_TC({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
   variable: "--font-noto-serif-tc",
-  weight: ["600", "700", "900"],
   display: "swap",
-  preload: false,
 });
 
-const siteTitle = `${defaultInvitationContent.topic}邀請函｜${defaultInvitationContent.speakerName} × BNI 長冠軍分會`;
-const siteDescription = `${defaultInvitationContent.speakerName} ${defaultInvitationContent.eventDate} ${defaultInvitationContent.topic}活動邀請與報名。${defaultInvitationContent.description}`;
+const eventDescription =
+  "BNI 臺北北區長冠軍分會 ｜ 2026.09.17 AM 06:30–08:30 ｜ 睿琪有限公司執行長 黃嘉琪《靜奢之境：霽雲的精品之路，與頂層生活圈的共創》";
+
+// OG/Twitter image URLs must be absolute; Vercel supplies the host at build time.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
 
 export const metadata: Metadata = {
-  applicationName: siteTitle,
+  metadataBase: new URL(siteUrl),
   title: {
-    default: siteTitle,
-    template: `%s｜${defaultInvitationContent.topic}邀請函`,
+    default: "靜奢之境｜BNI 臺北北區長冠軍分會 邀請函",
+    template: "%s | 靜奢之境",
   },
-  description: siteDescription,
+  description: eventDescription,
   openGraph: {
-    title: siteTitle,
-    description: siteDescription,
-    siteName: siteTitle,
-    locale: "zh_TW",
+    title: "靜奢之境｜黃嘉琪 × BNI 臺北北區長冠軍分會",
+    description: eventDescription,
     type: "website",
+    locale: "zh_TW",
+    images: [{ url: "/poster.jpg", width: 1721, height: 2435, alt: "活動海報" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "靜奢之境｜黃嘉琪 × BNI 臺北北區長冠軍分會",
+    description: eventDescription,
+    images: ["/poster.jpg"],
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="zh-Hant-TW"
-      className={`${geistSans.variable} ${geistMono.variable} ${notoSansTC.variable} ${notoSerifTC.variable}`}
-    >
+    <html lang="zh-TW" className={`${notoSansTc.variable} ${notoSerifTc.variable}`} suppressHydrationWarning>
       <body>
-        <SiteBackground />
         {children}
         <AppToaster />
       </body>

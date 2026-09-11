@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 
+export const runtime = "edge";
+
 export const size = {
   width: 180,
   height: 180,
@@ -73,13 +75,13 @@ export default function AppleIcon() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 54,
+            fontSize: 42,
             fontWeight: 900,
             lineHeight: 1,
             letterSpacing: 0,
           }}
         >
-          AI
+          BNI
         </div>
       </div>
     ),

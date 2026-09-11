@@ -1,129 +1,155 @@
-import { promises as fs } from "fs";
+import fs from "fs";
 import path from "path";
-import { Redis } from "@upstash/redis";
-import {
-  mergeInvitationContent,
-  type InvitationContent,
-  type Registration,
-} from "./invitation-content";
+import type { InvitationContent, Registration } from "./invitation-content";
+import { defaultInvitationContent } from "./invitation-content";
 
-const invitationKey = "bni:invitation-content";
-const registrationsKey = "bni:registrations";
-
-const dataDir = path.join(process.cwd(), "data");
-const invitationPath = path.join(dataDir, "invitation.json");
-const registrationsPath = path.join(dataDir, "registrations.jsonl");
-
-let redisClient: Redis | null | undefined;
-
-export function hasPersistentStorageConfig() {
-  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN;
-  return Boolean(url && token);
-}
-
-function getRedis() {
-  if (!hasPersistentStorageConfig()) {
-    return null;
-  }
-
-  if (redisClient === undefined) {
-    const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_KV_REST_API_URL;
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN;
-    
-    redisClient = new Redis({
-      url: url!,
-      token: token!,
-    });
-  }
-
-  return redisClient;
-}
+// ---------------------------------------------------------------------------
+// Storage mode detection
+// ---------------------------------------------------------------------------
 
 export function getStorageMode(): "upstash" | "local" {
-  return getRedis() ? "upstash" : "local";
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  return url && token ? "upstash" : "local";
 }
 
-async function readLocalJson<T>(filePath: string): Promise<T | null> {
-  try {
-    const file = await fs.readFile(filePath, "utf8");
-    return JSON.parse(file) as T;
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      return null;
-    }
+export function hasPersistentStorageConfig(): boolean {
+  return getStorageMode() === "upstash";
+}
 
-    throw error;
+// ---------------------------------------------------------------------------
+// Upstash Redis helpers (only imported when configured)
+// ---------------------------------------------------------------------------
+
+async function getRedis() {
+  const { Redis } = await import("@upstash/redis");
+  return new Redis({
+    url: (process.env.UPSTASH_REDIS_REST_URL ||
+      process.env.KV_REST_API_URL) as string,
+    token: (process.env.UPSTASH_REDIS_REST_TOKEN ||
+      process.env.KV_REST_API_TOKEN) as string,
+  });
+}
+
+const CONTENT_KEY = "invitation:content";
+const REGISTRATIONS_KEY = "invitation:registrations";
+
+// ---------------------------------------------------------------------------
+// Local file helpers
+// ---------------------------------------------------------------------------
+
+const DATA_DIR = path.join(process.cwd(), "data");
+const CONTENT_FILE = path.join(DATA_DIR, "content.json");
+const REGISTRATIONS_FILE = path.join(DATA_DIR, "registrations.jsonl");
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
   }
 }
+
+function readLocalContent(): InvitationContent {
+  try {
+    if (fs.existsSync(CONTENT_FILE)) {
+      const raw = fs.readFileSync(CONTENT_FILE, "utf-8");
+      return { ...defaultInvitationContent, ...JSON.parse(raw) };
+    }
+  } catch {
+    // fall through to default
+  }
+  return { ...defaultInvitationContent };
+}
+
+function writeLocalContent(content: InvitationContent) {
+  ensureDataDir();
+  fs.writeFileSync(CONTENT_FILE, JSON.stringify(content, null, 2), "utf-8");
+}
+
+function readLocalRegistrations(): Registration[] {
+  try {
+    if (fs.existsSync(REGISTRATIONS_FILE)) {
+      return fs
+        .readFileSync(REGISTRATIONS_FILE, "utf-8")
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as Registration);
+    }
+  } catch {
+    // fall through
+  }
+  return [];
+}
+
+function appendLocalRegistration(registration: Registration) {
+  ensureDataDir();
+  fs.appendFileSync(
+    REGISTRATIONS_FILE,
+    JSON.stringify(registration) + "\n",
+    "utf-8",
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
 export async function getInvitationContent(): Promise<InvitationContent> {
-  const redis = getRedis();
-
-  if (redis) {
-    const content = await redis.get<Partial<InvitationContent>>(invitationKey);
-    return mergeInvitationContent(content);
-  }
-
-  const content = await readLocalJson<Partial<InvitationContent>>(invitationPath);
-  return mergeInvitationContent(content);
-}
-
-export async function saveInvitationContent(content: InvitationContent) {
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.set(invitationKey, content);
-    return;
-  }
-
-  await fs.mkdir(dataDir, { recursive: true });
-  await fs.writeFile(invitationPath, `${JSON.stringify(content, null, 2)}\n`);
-}
-
-export async function saveRegistration(registration: Registration) {
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.lpush(registrationsKey, registration);
-    await redis.ltrim(registrationsKey, 0, 499);
-    return;
-  }
-
-  await fs.mkdir(dataDir, { recursive: true });
-  await fs.appendFile(registrationsPath, `${JSON.stringify(registration)}\n`);
-}
-
-export async function listRegistrations(limit = 50): Promise<Registration[]> {
-  const redis = getRedis();
-
-  if (redis) {
-    return redis.lrange<Registration>(registrationsKey, 0, limit - 1);
-  }
-
-  try {
-    const file = await fs.readFile(registrationsPath, "utf8");
-    return file
-      .split("\n")
-      .filter(Boolean)
-      .map((line) => JSON.parse(line) as Registration)
-      .reverse()
-      .slice(0, limit);
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      return [];
+  if (getStorageMode() === "upstash") {
+    try {
+      const redis = await getRedis();
+      const stored = await redis.get<InvitationContent>(CONTENT_KEY);
+      if (stored) {
+        return { ...defaultInvitationContent, ...stored };
+      }
+    } catch (err) {
+      console.error("Failed to read from Upstash, falling back to local", err);
     }
-
-    throw error;
   }
+  return readLocalContent();
+}
+
+export async function saveInvitationContent(
+  content: InvitationContent,
+): Promise<void> {
+  if (getStorageMode() === "upstash") {
+    try {
+      const redis = await getRedis();
+      await redis.set(CONTENT_KEY, content);
+      return;
+    } catch (err) {
+      console.error("Failed to write to Upstash, falling back to local", err);
+    }
+  }
+  writeLocalContent(content);
+}
+
+export async function saveRegistration(
+  registration: Registration,
+): Promise<void> {
+  if (getStorageMode() === "upstash") {
+    try {
+      const redis = await getRedis();
+      await redis.lpush(REGISTRATIONS_KEY, JSON.stringify(registration));
+      return;
+    } catch (err) {
+      console.error("Failed to write to Upstash, falling back to local", err);
+    }
+  }
+  appendLocalRegistration(registration);
+}
+
+export async function getRegistrations(): Promise<Registration[]> {
+  if (getStorageMode() === "upstash") {
+    try {
+      const redis = await getRedis();
+      const items = await redis.lrange<string>(REGISTRATIONS_KEY, 0, -1);
+      return items.map((item) =>
+        typeof item === "string" ? JSON.parse(item) : item,
+      ) as Registration[];
+    } catch (err) {
+      console.error("Failed to read from Upstash, falling back to local", err);
+    }
+  }
+  return readLocalRegistrations();
 }

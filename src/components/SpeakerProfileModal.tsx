@@ -1,138 +1,113 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Globe } from "lucide-react";
-import Image from "next/image";
-import { speakerData } from "@/lib/speaker-data";
-import styles from "./SpeakerProfileModal.module.css";
+"use client";
 
-type SpeakerProfileModalProps = {
-  isOpen: boolean;
+import { useEffect, useRef } from "react";
+import { X } from "lucide-react";
+import styles from "./SpeakerProfileModal.module.css";
+import type { InvitationContent } from "@/lib/invitation-content";
+
+type Props = {
+  content: InvitationContent;
   onClose: () => void;
-  speakerImageUrl: string;
 };
 
-export default function SpeakerProfileModal({ isOpen, onClose, speakerImageUrl }: SpeakerProfileModalProps) {
-  const [lang, setLang] = useState<"zh" | "en">("zh");
+export function SpeakerProfileModal({ content, onClose }: Props) {
+  const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Prevent scrolling on body when modal is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = prev;
     };
-  }, [isOpen]);
+  }, []);
 
-  const profile = speakerData[lang];
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className={styles.overlay} onClick={onClose}>
-          <motion.div
-            className={styles.modal}
-            onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+    <div
+      ref={overlayRef}
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${content.speakerName} 講者介紹`}
+      onClick={(e) => {
+        if (e.target === overlayRef.current) onClose();
+      }}
+    >
+      <div className={styles.modal}>
+        <div className={styles.header}>
+          <span className={styles.langToggle}>講者介紹</span>
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="關閉"
           >
-            <div className={styles.header}>
-              <div className={styles.langToggle}>
-                <Globe size={16} />
-                <button
-                  className={`${styles.langBtn} ${lang === "zh" ? styles.active : ""}`}
-                  onClick={() => setLang("zh")}
-                >
-                  ZH
-                </button>
-                <span className={styles.divider}>/</span>
-                <button
-                  className={`${styles.langBtn} ${lang === "en" ? styles.active : ""}`}
-                  onClick={() => setLang("en")}
-                >
-                  EN
-                </button>
-              </div>
-              <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className={styles.content}>
-              <div className={styles.profileHeader}>
-                <div className={styles.avatarWrapper}>
-                  <Image
-                    src={speakerImageUrl || "/assets/bni-invitation-poster-2026-07-09.png"} // fallback if needed
-                    alt={profile.name}
-                    width={100}
-                    height={100}
-                    className={styles.avatar}
-                    style={{ objectFit: "cover", objectPosition: "top center" }}
-                  />
-                </div>
-                <div className={styles.profileTitles}>
-                  <h2>{profile.name}</h2>
-                  <p className={styles.headline}>{profile.headline}</p>
-                  <p className={styles.company}>{profile.company}</p>
-                </div>
-              </div>
-
-              <div className={styles.section}>
-                <h3>{lang === "zh" ? "關於我" : "About"}</h3>
-                <p className={styles.aboutText}>{profile.about}</p>
-              </div>
-
-              <div className={styles.section}>
-                <h3>{lang === "zh" ? "經歷" : "Experience"}</h3>
-                <ul className={styles.experienceList}>
-                  {profile.experiences.map((exp, idx) => (
-                    <li key={idx} className={styles.experienceItem}>
-                      <div className={styles.expDot} />
-                      <div className={styles.expDetails}>
-                        <h4 className={styles.expTitle}>{exp.title}</h4>
-                        <p className={styles.expCompany}>
-                          {exp.company}
-                          {exp.location ? ` · ${exp.location}` : ""}
-                        </p>
-                        <p className={styles.expPeriod}>{exp.period}</p>
-                        {exp.highlights?.length ? (
-                          <ul className={styles.expHighlights}>
-                            {exp.highlights.map((highlight, hIdx) => (
-                              <li key={hIdx}>{highlight}</li>
-                            ))}
-                          </ul>
-                        ) : null}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {profile.education?.length ? (
-                <div className={styles.section}>
-                  <h3>{lang === "zh" ? "學歷" : "Education"}</h3>
-                  <ul className={styles.experienceList}>
-                    {profile.education.map((edu, idx) => (
-                      <li key={idx} className={styles.experienceItem}>
-                        <div className={styles.expDot} />
-                        <div className={styles.expDetails}>
-                          <h4 className={styles.expTitle}>{edu.school}</h4>
-                          <p className={styles.expCompany}>{edu.degree}</p>
-                          <p className={styles.expPeriod}>{edu.period}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-          </motion.div>
+            <X size={20} />
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className={styles.content}>
+          <div className={styles.profileHeader}>
+            <div className={styles.avatarWrapper}>
+              <div className={styles.avatarMonogram}>
+                {content.speakerName.charAt(0)}
+              </div>
+            </div>
+            <div className={styles.profileTitles}>
+              <h2>{content.speakerName}</h2>
+              <p className={styles.headline}>{content.speakerRoles}</p>
+              <p className={styles.company}>{content.speakerCompany}</p>
+            </div>
+          </div>
+
+          <div className={styles.section}>
+            <h3>主題</h3>
+            <p className={styles.aboutText}>{content.topic}</p>
+            {content.tagline && (
+              <p className={styles.tagline}>{content.tagline}</p>
+            )}
+          </div>
+
+          {content.speakerBio && (
+            <div className={styles.section}>
+              <h3>關於講者</h3>
+              <p className={styles.aboutText}>{content.speakerBio}</p>
+            </div>
+          )}
+
+          {content.highlights.length > 0 && (
+            <div className={styles.section}>
+              <h3>品牌亮點</h3>
+              <ul className={styles.highlightList}>
+                {content.highlights.map((item) => (
+                  <li key={item}>
+                    <span aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className={styles.section}>
+            <h3>活動簡介</h3>
+            <p className={styles.aboutText}>{content.description}</p>
+          </div>
+
+          {content.referralAudience && (
+            <div className={styles.section}>
+              <h3>引薦對象</h3>
+              <p className={styles.aboutText}>{content.referralAudience}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,22 +1,23 @@
 .shell {
-  --page-bg: #e9edf3;
-  --surface: #fffdf8;
-  --surface-soft: #faf6ef;
-  --surface-tint: #eef5f1;
-  --ink: #232a33;
-  --ink-muted: #5b6470;
-  --ink-subtle: #7c8590;
-  --line: rgb(30 38 52 / 0.12);
-  --line-strong: rgb(30 38 52 / 0.18);
+  /* Quiet-luxury palette: warm ivory ground, BNI crimson, champagne accent. */
+  --page-bg: #efeae4;
+  --surface: #fffdfa;
+  --surface-soft: #f8f4ee;
+  --surface-tint: #f4efe7;
+  --ink: #24201e;
+  --ink-muted: #5d5651;
+  --ink-subtle: #837a73;
+  --line: rgb(36 32 30 / 0.12);
+  --line-strong: rgb(36 32 30 / 0.2);
   --brand: #c8102e;
   --brand-strong: #9c0f24;
   --brand-soft: rgb(200 16 46 / 0.12);
   --brand-faint: rgb(200 16 46 / 0.06);
-  --edu: #2f6f68;
-  --edu-strong: #235b55;
-  --edu-soft: rgb(47 111 104 / 0.12);
-  --shadow: rgb(20 26 40 / 0.1);
-  --shadow-strong: rgb(20 26 40 / 0.16);
+  --accent: #8c6a43;
+  --accent-strong: #6b4f30;
+  --accent-soft: rgb(140 106 67 / 0.13);
+  --shadow: rgb(48 38 30 / 0.1);
+  --shadow-strong: rgb(48 38 30 / 0.18);
   /* Glass system — translucent surfaces that float over the mesh background. */
   --glass: rgb(255 255 255 / 0.52);
   --glass-strong: rgb(255 255 255 / 0.64);
@@ -24,7 +25,7 @@
   --glass-border: rgb(255 255 255 / 0.62);
   --glass-blur: blur(20px) saturate(1.35);
   --glass-blur-soft: blur(14px) saturate(1.2);
-  --glass-shadow: 0 20px 50px rgb(20 26 40 / 0.16);
+  --glass-shadow: 0 20px 50px rgb(48 38 30 / 0.16);
   --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.65);
   --brand-glass: rgb(200 16 46 / 0.78);
   --brand-glass-strong: rgb(156 15 36 / 0.86);
@@ -401,8 +402,10 @@
     linear-gradient(145deg, #c41f31, #891822),
     var(--brand);
   color: #fff;
-  font-size: 1.1rem;
+  /* "BNI" is a glyph wider than the old two-letter seal — tighten to fit. */
+  font-size: 0.98rem;
   font-weight: 950;
+  letter-spacing: 0.02em;
   transform: translateY(8%) translateZ(1px);
   transition:
     opacity 240ms ease,
@@ -516,8 +519,7 @@
   padding-top: 4px;
 }
 
-.chipGrid,
-.linkRow {
+.chipGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
@@ -535,8 +537,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.linkButton svg,
-.pendingLink svg,
 .form label svg,
 .successMessage svg {
   color: var(--brand);
@@ -544,7 +544,7 @@
 }
 
 .infoChip svg {
-  color: var(--edu);
+  color: var(--accent);
   flex: 0 0 auto;
 }
 
@@ -574,93 +574,21 @@
 }
 
 .detailBlock dt {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   color: var(--brand-strong);
   font-size: 0.8rem;
   font-weight: 900;
 }
 
+.detailBlock dt svg {
+  flex: 0 0 auto;
+  opacity: 0.8;
+}
+
 .detailBlock dd {
   color: var(--ink);
-}
-
-.linkRow {
-  grid-template-columns: 1fr 1fr;
-}
-
-.linkRow:has(> :only-child) {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-@media (min-width: 641px) {
-  .linkRow:has(> :only-child) > * {
-    min-width: min(320px, 100%);
-    justify-self: start;
-  }
-}
-
-.linkButton,
-.pendingLink {
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgb(53 47 42 / 0.1);
-  border-radius: 999px;
-  background: rgb(255 253 248 / 0.72);
-  color: var(--ink);
-  font-weight: 850;
-  padding: 0 14px;
-}
-
-.linkButton {
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
-}
-
-.linkButton:hover {
-  transform: translateY(-1px);
-  border-color: rgb(47 111 104 / 0.28);
-  background: var(--surface-tint);
-}
-
-.pendingLink {
-  color: var(--ink-subtle);
-}
-
-.tooltipTarget {
-  position: relative;
-}
-
-.tooltipTarget::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 9px);
-  left: 50%;
-  z-index: 6;
-  width: max-content;
-  max-width: 220px;
-  border-radius: 6px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 0.74rem;
-  font-weight: 800;
-  line-height: 1.2;
-  opacity: 0;
-  padding: 7px 9px;
-  pointer-events: none;
-  transform: translate(-50%, 4px);
-  transition:
-    opacity 150ms ease,
-    transform 150ms ease;
-}
-
-.tooltipTarget:hover::after,
-.tooltipTarget:focus-visible::after {
-  opacity: 1;
-  transform: translate(-50%, 0);
 }
 
 .form,
@@ -699,8 +627,8 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: var(--edu-soft);
-  color: var(--edu-strong);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
   font-size: 0.8rem;
   font-weight: 900;
   padding: 0 10px;
@@ -708,7 +636,7 @@
 }
 
 .formBenefit {
-  border-left: 3px solid var(--edu);
+  border-left: 3px solid var(--accent);
   font-size: 0.94rem;
   line-height: 1.55;
   padding-left: 12px;
@@ -836,7 +764,7 @@
 
 .successMessage {
   background: rgb(47 111 104 / 0.08);
-  color: var(--edu-strong);
+  color: var(--accent-strong);
 }
 
 .errorMessage {
@@ -866,7 +794,7 @@
 }
 
 .disclosureIcon {
-  color: var(--edu);
+  color: var(--accent);
   flex: 0 0 auto;
   transition: transform 180ms ease;
 }
@@ -889,7 +817,7 @@
 .successReceipt {
   position: relative;
   overflow: hidden;
-  border-top: 3px solid var(--edu);
+  border-top: 3px solid var(--accent);
   outline: none;
   scroll-margin-top: 28px;
 }
@@ -942,7 +870,7 @@
   place-items: center;
   border-radius: 50%;
   background: rgb(47 111 104 / 0.1);
-  color: var(--edu-strong);
+  color: var(--accent-strong);
 }
 
 .receiptHeader h2 {
@@ -953,7 +881,7 @@
 }
 
 .receiptStatus {
-  color: var(--edu-strong);
+  color: var(--accent-strong);
   font-size: 1rem;
   font-weight: 900;
 }
@@ -991,7 +919,7 @@
 .copyCodeButton[data-copied="true"] {
   background:
     linear-gradient(135deg, #1f3431, #234b45),
-    var(--edu-strong);
+    var(--accent-strong);
   box-shadow: 0 0 0 3px rgb(47 111 104 / 0.18);
 }
 
@@ -1032,7 +960,7 @@
 }
 
 .receiptApplies svg {
-  color: var(--edu);
+  color: var(--accent);
 }
 
 .receiptActions {
@@ -1079,7 +1007,7 @@
   border: 1px solid rgb(47 111 104 / 0.22);
   border-radius: 999px;
   background: var(--surface);
-  color: var(--edu-strong);
+  color: var(--accent-strong);
   font-weight: 900;
   padding: 0 16px;
 }
@@ -1111,7 +1039,7 @@
 }
 
 .calendarButton svg {
-  color: var(--edu);
+  color: var(--accent);
   flex: 0 0 auto;
 }
 
@@ -1150,7 +1078,7 @@
 }
 
 .compactChipGrid svg {
-  color: var(--edu);
+  color: var(--accent);
   flex: 0 0 auto;
 }
 
@@ -1293,7 +1221,7 @@
 }
 
 .loadingDots span:nth-child(2) {
-  background: var(--edu);
+  background: var(--accent);
   animation-delay: 0.16s;
 }
 
@@ -1337,6 +1265,14 @@
     justify-items: center;
     order: 2;
     text-align: center;
+  }
+
+  /* A left rule reads as a misalignment once the copy is centered. */
+  .letterTagline {
+    border-left: 0;
+    border-top: 1px solid var(--accent);
+    padding-left: 0;
+    padding-top: 12px;
   }
 
   .letterScene {
@@ -1406,11 +1342,6 @@
 
   .chipGrid {
     grid-template-columns: 1fr;
-  }
-
-  .linkRow {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
   }
 
   .chipGrid {
@@ -1587,14 +1518,7 @@
   }
 }
 
-@media (hover: none) {
-  .tooltipTarget::after {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .linkButton,
   .submitButton,
   .nextRegistrationButton,
   .calendarButton,
@@ -1628,8 +1552,6 @@
 .form,
 .successReceipt,
 .loadingCard,
-.linkButton,
-.pendingLink,
 .iconButton,
 .rsvpButton,
 .secondaryAction,
@@ -1647,7 +1569,7 @@
 
 .formBadge {
   background: var(--glass-strong);
-  color: var(--edu-strong);
+  color: var(--accent-strong);
   box-shadow: var(--glass-highlight);
 }
 
@@ -1674,7 +1596,7 @@
 
 /* Re-assert the receipt's teal top accent after the glass border shorthand. */
 .successReceipt {
-  border-top: 3px solid var(--edu);
+  border-top: 3px solid var(--accent);
 }
 
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -1688,8 +1610,6 @@
   }
 
   .loadingCard,
-  .linkButton,
-  .pendingLink,
   .iconButton,
   .rsvpButton,
   .secondaryAction,
@@ -1775,6 +1695,68 @@
   line-height: 1.18;
 }
 
+/* --------------------------------------------------------------------------
+   Poster voice — the 《靜奢之境》 tagline and the three product claims.
+   Serif, generously leaded, hairline rules: quiet rather than loud.
+   -------------------------------------------------------------------------- */
+
+.letterTagline {
+  position: relative;
+  z-index: 1;
+  max-width: 26ch;
+  border-left: 2px solid var(--accent);
+  padding-left: 14px;
+  color: var(--ink-muted);
+  font-family: var(--font-serif-tc);
+  font-size: clamp(0.92rem, 1.6vw, 1.06rem);
+  font-weight: 400;
+  line-height: 1.75;
+  word-break: keep-all;
+  text-wrap: pretty;
+}
+
+.detailBlock .tagline {
+  color: var(--accent-strong);
+  font-family: var(--font-serif-tc);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.7;
+  word-break: keep-all;
+  text-wrap: pretty;
+}
+
+.highlightList {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding-block: 12px;
+  list-style: none;
+}
+
+.highlightList li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 0.94rem;
+  font-weight: 500;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* Champagne dot marker, drawn rather than a list bullet so it can be tinted. */
+.highlightList li span {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-2px);
+}
+
+
 .posterSubtitle {
   color: var(--ink-muted);
   font-size: clamp(0.9rem, 1.5vw, 1.06rem);
@@ -1815,7 +1797,7 @@
   grid-template-rows: auto auto auto;
   border-radius: 16px;
   box-shadow:
-    0 26px 60px -24px rgb(20 26 40 / 0.32),
+    0 26px 60px -24px rgb(48 38 30 / 0.32),
     0 1px 0 rgb(255 255 255 / 0.5) inset;
 }
 
@@ -1853,7 +1835,7 @@
   right: 26px;
   top: 50%;
   height: 0;
-  border-top: 2px dashed rgb(30 38 52 / 0.24);
+  border-top: 2px dashed rgb(48 38 30 / 0.24);
   transform: translateY(-50%);
 }
 
@@ -1865,10 +1847,10 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 1px solid rgb(30 38 52 / 0.14);
+  border: 1px solid rgb(48 38 30 / 0.14);
   background: #fffdf8;
   color: var(--ink-subtle);
-  box-shadow: 0 2px 6px rgb(20 26 40 / 0.14);
+  box-shadow: 0 2px 6px rgb(48 38 30 / 0.14);
 }
 
 .ticketWelcome {

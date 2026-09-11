@@ -14,7 +14,7 @@ function makeCouponCode(name: string, lineId: string) {
     hash |= 0;
   }
 
-  return `AI2026-${Math.abs(hash).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
+  return `BNI0917-${Math.abs(hash).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
 }
 
 export async function POST(request: Request) {

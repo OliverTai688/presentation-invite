@@ -48,6 +48,12 @@ function cleanUrl(value: unknown, maxLength = 300) {
   }
 }
 
+// Keeps a parseable timestamp; falls back to the configured default otherwise.
+function cleanIsoDateTime(value: unknown, fallback: string) {
+  const text = cleanText(value, 40);
+  return text && !Number.isNaN(Date.parse(text)) ? text : fallback;
+}
+
 export async function parseJsonRequest(request: Request) {
   try {
     return await request.json();
@@ -92,29 +98,45 @@ export function validateRegistrationInput(
   };
 }
 
+// Accepts either an array or a newline-separated textarea value (admin editor).
+function toLineList(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return cleanMultiline(value, 600)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 export function validateInvitationContent(
   input: unknown,
 ): ValidationResult<InvitationContent> {
   const payload =
     input && typeof input === "object" ? (input as Record<string, unknown>) : {};
 
-  const notesValue = Array.isArray(payload.notes)
-    ? payload.notes
-    : cleanMultiline(payload.notes, 500)
-        .split("\n")
-        .map((note) => note.trim())
-        .filter(Boolean);
+  const notesValue = toLineList(payload.notes);
+  const highlightsValue = toLineList(payload.highlights);
 
   const content: InvitationContent = {
     eventTitle: cleanText(payload.eventTitle, 120),
     chapterName: cleanText(payload.chapterName, 120),
     eventDate: cleanText(payload.eventDate, 40),
     eventTime: cleanText(payload.eventTime, 60),
+    startAt: cleanIsoDateTime(payload.startAt, defaultInvitationContent.startAt),
+    endAt: cleanIsoDateTime(payload.endAt, defaultInvitationContent.endAt),
     speakerName: cleanText(payload.speakerName, 80),
     speakerCompany: cleanText(payload.speakerCompany, 120),
     speakerRoles: cleanText(payload.speakerRoles, 160),
     topic: cleanText(payload.topic, 80),
+    tagline: cleanText(payload.tagline, 120),
     description: cleanText(payload.description, 220),
+    highlights: highlightsValue
+      .map((item) => cleanText(item, 60))
+      .filter(Boolean)
+      .slice(0, 6),
+    speakerBio: cleanMultiline(payload.speakerBio, 800),
     locationName: cleanText(payload.locationName, 120),
     locationAddress: cleanText(payload.locationAddress, 180),
     fee: cleanText(payload.fee, 40),
@@ -144,6 +166,10 @@ export function validateInvitationContent(
 
   if (content.notes.length === 0) {
     content.notes = defaultInvitationContent.notes;
+  }
+
+  if (content.highlights.length === 0) {
+    content.highlights = defaultInvitationContent.highlights;
   }
 
   return { ok: true, value: content };

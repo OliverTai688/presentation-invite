@@ -1,5 +1,5 @@
 :root {
-  --bg-base: #f7f3ee;
+  --bg-base: #efeae4;
   --text-base: #211c1c;
   --text-muted: #625b57;
   --accent-red: #b91c2b;
@@ -23,7 +23,7 @@ html {
   height: 100%;
   scroll-behavior: smooth;
   /* Cool-fog fallback painted before the WebGL background mounts. */
-  background-color: #e9edf3;
+  background-color: #efeae4;
 }
 
 body {

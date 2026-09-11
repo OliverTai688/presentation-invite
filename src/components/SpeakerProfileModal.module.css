@@ -99,13 +99,65 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 3px solid #fbdcde;
+  border: 3px solid rgb(200 16 46 / 0.18);
 }
 
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Monogram stands in for a portrait: crimson→champagne, matching the poster. */
+.avatarMonogram {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(140deg, #c8102e, #8c6a43);
+  color: #fff;
+  font-family: var(--font-serif-tc);
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.tagline {
+  margin: 10px 0 0;
+  border-left: 2px solid #8c6a43;
+  padding-left: 12px;
+  color: #6b4f30;
+  font-family: var(--font-serif-tc);
+  font-size: 15px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.highlightList {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.highlightList li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: #24201e;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.highlightList li span {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8c6a43;
+  transform: translateY(-2px);
 }
 
 .profileTitles h2 {
