@@ -70,7 +70,7 @@ export const defaultInvitationContent: InvitationContent = {
     "附設停車場",
     "會議 AM 06:30 開始，建議提前 15 分鐘抵達",
   ],
-  referralAudience: "室內設計師／藝廊／藝術家／茶師／花藝老師",
+  referralAudience: "精品顧問 / 藝廊 / 私廚 / 質感場域",
   posterImagePath: "/poster.jpg",
   linkedinUrl: "",
   meetNuvaUrl: "https://app.meetnuva.com",
