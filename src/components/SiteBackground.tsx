@@ -9,8 +9,8 @@ export function SiteBackground() {
       <MeshGradient
         className={styles.mesh}
         /* Warm ivory ground with a breath of crimson and champagne —
-           the quiet-luxury tone of the 靜奢之境 poster. */
-        colors={["#efeae4", "#f6efe6", "#e6d9d2", "#f3e7dc", "#e4dcd4"]}
+           the warm ivory / crimson tone of the event poster. */
+        colors={["#efeae4", "#f6efe6", "#e6d9d2", "#f3e7dc", "#dfe6e5"]}
         speed={0.6}
       />
       <div className={styles.veil} />

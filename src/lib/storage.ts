@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { InvitationContent, Registration } from "./invitation-content";
-import { defaultInvitationContent } from "./invitation-content";
+import { defaultInvitationContent, EVENT_KEY } from "./invitation-content";
 
 // ---------------------------------------------------------------------------
 // Storage mode detection
@@ -32,16 +32,17 @@ async function getRedis() {
   });
 }
 
-const CONTENT_KEY = "invitation:content";
-const REGISTRATIONS_KEY = "invitation:registrations";
+// Namespaced per event so a new event starts clean (see EVENT_KEY).
+const CONTENT_KEY = `invitation:${EVENT_KEY}:content`;
+const REGISTRATIONS_KEY = `invitation:${EVENT_KEY}:registrations`;
 
 // ---------------------------------------------------------------------------
 // Local file helpers
 // ---------------------------------------------------------------------------
 
 const DATA_DIR = path.join(process.cwd(), "data");
-const CONTENT_FILE = path.join(DATA_DIR, "content.json");
-const REGISTRATIONS_FILE = path.join(DATA_DIR, "registrations.jsonl");
+const CONTENT_FILE = path.join(DATA_DIR, `content-${EVENT_KEY}.json`);
+const REGISTRATIONS_FILE = path.join(DATA_DIR, `registrations-${EVENT_KEY}.jsonl`);
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {

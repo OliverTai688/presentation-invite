@@ -18,7 +18,7 @@ const notoSerifTc = Noto_Serif_TC({
 });
 
 const eventDescription =
-  "BNI 臺北北區長冠軍分會 ｜ 2026.09.17 AM 06:30–08:30 ｜ 睿琪有限公司執行長 黃嘉琪《靜奢之境：霽雲的精品之路，與頂層生活圈的共創》";
+  "BNI 臺北北區長冠軍分會 ｜ 2026.12.03（四）AM 06:30–08:30 ｜ 台北漢普頓酒店 ｜ 會計師古又帆 × 品牌顧問陳宜均：從募資 2,000 萬到企業成長，雙顧問如何打造企業競爭力。";
 
 // OG/Twitter image URLs must be absolute; Vercel supplies the host at build time.
 const siteUrl =
@@ -30,22 +30,22 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "靜奢之境｜BNI 臺北北區長冠軍分會 邀請函",
-    template: "%s | 靜奢之境",
+    default: "從募資 2,000 萬到企業成長｜BNI 臺北北區長冠軍分會 邀請函",
+    template: "%s | BNI 臺北北區長冠軍分會",
   },
   description: eventDescription,
   openGraph: {
-    title: "靜奢之境｜黃嘉琪 × BNI 臺北北區長冠軍分會",
+    title: "12/3 邀請函｜從募資 2,000 萬到企業成長：雙顧問如何打造企業競爭力",
     description: eventDescription,
     type: "website",
     locale: "zh_TW",
-    images: [{ url: "/poster.jpg", width: 1721, height: 2435, alt: "活動海報" }],
+    images: [{ url: "/poster-20261203.jpg", width: 794, height: 1123, alt: "12/3 活動海報" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "靜奢之境｜黃嘉琪 × BNI 臺北北區長冠軍分會",
+    title: "12/3 邀請函｜從募資 2,000 萬到企業成長：雙顧問如何打造企業競爭力",
     description: eventDescription,
-    images: ["/poster.jpg"],
+    images: ["/poster-20261203.jpg"],
   },
 };
 

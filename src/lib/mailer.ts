@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import type { InvitationContent, Registration } from "./invitation-content";
+import { plainTitle, type InvitationContent, type Registration } from "./invitation-content";
 
 export type EmailConfigStatus = {
   gmailConfigured: boolean;
@@ -11,6 +11,15 @@ export function getEmailConfigStatus(): EmailConfigStatus {
       process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD,
     ),
   };
+}
+
+/** Registration fields come from the public form, so escape them before they go into HTML. */
+function esc(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function createTransport() {
@@ -34,6 +43,13 @@ function buildAttendeeHtml(
     )
     .join("");
 
+  const speakers = content.speakers
+    .map(
+      (s) =>
+        `<strong>${s.name}</strong>　${s.role}<br><span style="font-size:13px;color:#5d5651">${s.company}</span>`,
+    )
+    .join('<div style="height:8px"></div>');
+
   const notes = content.notes
     .map(
       (note) =>
@@ -54,7 +70,7 @@ function buildAttendeeHtml(
     </div>
 
     <div style="padding:30px 32px">
-      <p style="margin:0 0 18px;color:#24201e;font-size:15px">親愛的 <strong>${registration.name}</strong>，您好！</p>
+      <p style="margin:0 0 18px;color:#24201e;font-size:15px">親愛的 <strong>${esc(registration.name)}</strong>，您好！</p>
       <p style="margin:0 0 24px;color:#5d5651;line-height:1.8;font-size:14px">感謝您報名本場例會。以下是活動資訊與您的專屬邀請序號，敬請於報到時出示。</p>
 
       ${
@@ -67,13 +83,13 @@ function buildAttendeeHtml(
         <tr><td style="padding:10px 0;border-top:1px solid #eae3da;color:#9c0f24;font-size:12px;font-weight:700;width:64px;vertical-align:top">日期</td><td style="padding:10px 0;border-top:1px solid #eae3da;color:#24201e;font-size:14px">${content.eventDate}</td></tr>
         <tr><td style="padding:10px 0;border-top:1px solid #eae3da;color:#9c0f24;font-size:12px;font-weight:700;vertical-align:top">時間</td><td style="padding:10px 0;border-top:1px solid #eae3da;color:#24201e;font-size:14px">${content.eventTime}</td></tr>
         <tr><td style="padding:10px 0;border-top:1px solid #eae3da;color:#9c0f24;font-size:12px;font-weight:700;vertical-align:top">地點</td><td style="padding:10px 0;border-top:1px solid #eae3da;color:#24201e;font-size:14px">${content.locationName}<br><span style="font-size:13px;color:#5d5651">${content.locationAddress}</span></td></tr>
-        <tr><td style="padding:10px 0;border-top:1px solid #eae3da;color:#9c0f24;font-size:12px;font-weight:700;vertical-align:top">講者</td><td style="padding:10px 0;border-top:1px solid #eae3da;color:#24201e;font-size:14px"><strong>${content.speakerName}</strong><br><span style="font-size:13px;color:#5d5651">${content.speakerCompany}　${content.speakerRoles}</span></td></tr>
+        <tr><td style="padding:10px 0;border-top:1px solid #eae3da;color:#9c0f24;font-size:12px;font-weight:700;vertical-align:top">講者</td><td style="padding:10px 0;border-top:1px solid #eae3da;color:#24201e;font-size:14px">${speakers}</td></tr>
         <tr><td style="padding:10px 0;border-top:1px solid #eae3da;color:#9c0f24;font-size:12px;font-weight:700;vertical-align:top">費用</td><td style="padding:10px 0;border-top:1px solid #eae3da;color:#24201e;font-size:14px">${content.fee}</td></tr>
       </table>
 
       ${
         highlights
-          ? `<p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#6b4f30;letter-spacing:.06em">品牌亮點</p>
+          ? `<p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#6b4f30;letter-spacing:.06em">分享重點</p>
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px">${highlights}</table>`
           : ""
       }
@@ -115,11 +131,11 @@ function buildOrganizerHtml(
     </div>
     <div style="padding:24px">
       <table style="width:100%;border-collapse:collapse">
-        <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700;width:72px">姓名</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e;font-weight:700">${registration.name}</td></tr>
-        <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">LINE ID</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${registration.lineId}</td></tr>
-        <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">Email</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${registration.email}</td></tr>
+        <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700;width:72px">姓名</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e;font-weight:700">${esc(registration.name)}</td></tr>
+        <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">LINE ID</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${esc(registration.lineId)}</td></tr>
+        <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">Email</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${esc(registration.email)}</td></tr>
         <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">邀請序號</td><td style="padding:8px 0;border-top:1px solid #eae3da;font-family:monospace;font-weight:700;color:#c8102e">${registration.couponCode}</td></tr>
-        ${registration.referrerName ? `<tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">推薦人</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${registration.referrerName}</td></tr>` : ""}
+        ${registration.referrerName ? `<tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">推薦人</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${esc(registration.referrerName)}</td></tr>` : ""}
         <tr><td style="padding:8px 0;border-top:1px solid #eae3da;color:#5d5651;font-size:12px;font-weight:700">時間</td><td style="padding:8px 0;border-top:1px solid #eae3da;color:#24201e">${new Date(registration.createdAt).toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}</td></tr>
       </table>
     </div>
@@ -160,7 +176,7 @@ export async function sendRegistrationEmails(
     await transporter.sendMail({
       from: fromAddress,
       to: organizerRecipient,
-      subject: `【新報名】${registration.name} — ${content.eventTitle}`,
+      subject: `【新報名】${registration.name} — ${plainTitle(content)}`,
       html: buildOrganizerHtml(content, registration),
     });
     organizerEmailSent = true;
@@ -169,7 +185,7 @@ export async function sendRegistrationEmails(
   await transporter.sendMail({
     from: fromAddress,
     to: registration.email,
-    subject: `報名確認｜${content.eventTitle}・${content.eventDate}`,
+    subject: `報名確認｜${plainTitle(content)}・${content.eventDate}`,
     html: buildAttendeeHtml(content, registration),
   });
   attendeeEmailSent = true;

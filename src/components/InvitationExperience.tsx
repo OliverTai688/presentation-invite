@@ -28,9 +28,16 @@ import {
   Ticket,
   Send,
   Scissors,
+  Share2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import type { InvitationContent, Registration } from "@/lib/invitation-content";
+import {
+  plainTitle,
+  speakerNames,
+  type InvitationContent,
+  type Registration,
+  type Speaker,
+} from "@/lib/invitation-content";
 import { SiteBackground } from "./SiteBackground";
 import { SpeakerProfileModal } from "./SpeakerProfileModal";
 import { BorderBeam } from "./BorderBeam";
@@ -61,10 +68,11 @@ type SubmitState =
 
 /**
  * The cover already shows the event title, so drop a repeated
- * "靜奢之境：" prefix from the topic line beneath it.
+ * "從募資 2,000 萬到企業成長：" prefix from the topic line beneath it.
  */
 function topicSubtitle(content: InvitationContent) {
-  const prefix = content.eventTitle;
+  // The title may carry NBSP / zero-width wrap hints; compare on plain text.
+  const prefix = plainTitle(content);
   if (prefix && content.topic.startsWith(prefix)) {
     return content.topic.slice(prefix.length).replace(/^[：:，,\s-—]+/, "") || content.topic;
   }
@@ -72,7 +80,7 @@ function topicSubtitle(content: InvitationContent) {
 }
 
 function calendarTitle(content: InvitationContent) {
-  return `${content.chapterName}｜${content.speakerName} — ${content.eventTitle}`;
+  return `${content.chapterName}｜${speakerNames(content)} — ${plainTitle(content)}`;
 }
 
 function calendarDetails(content: InvitationContent) {
@@ -135,16 +143,83 @@ function downloadIcs(content: InvitationContent) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${content.eventTitle}.ics`;
+  link.download = `${plainTitle(content)}.ics`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
 
+/** Native share sheet on phones; copies the link everywhere else. */
+async function shareInvitation(content: InvitationContent) {
+  const url = window.location.origin;
+  const title = `${plainTitle(content)}｜${content.chapterName}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text: content.tagline || content.topic, url });
+      return "shared" as const;
+    } catch {
+      // user dismissed the sheet; fall through to copying
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    return "copied" as const;
+  } catch {
+    return "failed" as const;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
+
+function SpeakerCards({
+  speakers,
+  onOpen,
+}: {
+  speakers: Speaker[];
+  onOpen: (speaker: Speaker) => void;
+}) {
+  return (
+    <div className={styles.speakerGrid}>
+      {speakers.map((speaker, index) => (
+        <article
+          key={speaker.name}
+          className={styles.speakerCard}
+          data-tone={index % 2 === 0 ? "teal" : "copper"}
+        >
+          <div className={styles.speakerPhoto}>
+            {speaker.photo ? (
+              <Image
+                src={speaker.photo}
+                alt={speaker.name}
+                width={160}
+                height={160}
+              />
+            ) : (
+              <span>{speaker.name.charAt(0)}</span>
+            )}
+          </div>
+          <div className={styles.speakerText}>
+            <p className={styles.speakerRole}>{speaker.role}</p>
+            <h3>{speaker.name}</h3>
+            <p className={styles.speakerCompany}>{speaker.company}</p>
+          </div>
+          <button
+            type="button"
+            className={styles.speakerMore}
+            onClick={() => onOpen(speaker)}
+            aria-label={`查看 ${speaker.name} 講者介紹`}
+          >
+            <Info size={14} />
+            講者介紹
+          </button>
+        </article>
+      ))}
+    </div>
+  );
+}
 
 function LoadingOverlay() {
   return (
@@ -214,7 +289,8 @@ export function InvitationExperience({ content }: { content: InvitationContent }
   const [opening, setOpening] = useState(false);
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: "idle" });
   const [posterModal, setPosterModal] = useState(false);
-  const [speakerModal, setSpeakerModal] = useState(false);
+  const [speakerModal, setSpeakerModal] = useState<Speaker | null>(null);
+  const [shareLabel, setShareLabel] = useState("分享邀請函");
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
   const nameId = useId();
@@ -352,10 +428,13 @@ export function InvitationExperience({ content }: { content: InvitationContent }
                 <p className={styles.letterMeta}>
                   {content.eventDate}・{content.eventTime}
                 </p>
-                <p className={styles.letterSpeaker}>
-                  {content.speakerCompany}　{content.speakerRoles}　
-                  <strong>{content.speakerName}</strong>
-                </p>
+                <div className={styles.letterSpeakers}>
+                  {content.speakers.map((speaker) => (
+                    <p key={speaker.name} className={styles.letterSpeaker}>
+                      {speaker.role}　<strong>{speaker.name}</strong>
+                    </p>
+                  ))}
+                </div>
                 <span className={styles.letterAction} aria-hidden="true">
                   <Mail size={16} />
                   點擊開啟邀請函
@@ -384,7 +463,7 @@ export function InvitationExperience({ content }: { content: InvitationContent }
                   <div className={styles.envelopePocket}>
                     <div className={styles.envelopeAddress}>
                       <span>{content.chapterName}</span>
-                      <span>{content.speakerName}</span>
+                      <span>{speakerNames(content)}</span>
                     </div>
                   </div>
 
@@ -422,7 +501,7 @@ export function InvitationExperience({ content }: { content: InvitationContent }
               <div className={styles.posterToolbarText}>
                 <h1>{content.eventTitle}</h1>
                 <p>
-                  {content.chapterName}・{content.speakerName}
+                  {content.chapterName}・{speakerNames(content)}
                 </p>
               </div>
               <div className={styles.posterActions}>
@@ -491,26 +570,21 @@ export function InvitationExperience({ content }: { content: InvitationContent }
                 </div>
               </div>
 
-              {/* Speaker block */}
-              <div className={styles.profileBlock}>
-                <p className={styles.eyebrow}>講者</p>
-                <h2>{content.speakerName}</h2>
-                <p>{content.speakerRoles}</p>
-                <p className={styles.muted}>{content.speakerCompany}</p>
-                <button
-                  id="view-speaker-button"
-                  className={styles.rsvpButton}
-                  onClick={() => setSpeakerModal(true)}
-                >
-                  <Info size={15} />
-                  查看講者介紹
-                </button>
-              </div>
-
-              {/* Detail block */}
+              {/* Topic leads, then the two speakers who deliver it */}
               <div className={styles.detailBlock}>
                 <p className={styles.eyebrow}>主題</p>
                 <h2>{content.topic}</h2>
+              </div>
+
+              <div className={styles.profileBlock}>
+                <p className={styles.eyebrow}>雙講者</p>
+                <SpeakerCards
+                  speakers={content.speakers}
+                  onOpen={setSpeakerModal}
+                />
+              </div>
+
+              <div className={styles.detailBlock}>
                 {content.tagline && (
                   <p className={styles.tagline}>{content.tagline}</p>
                 )}
@@ -764,14 +838,16 @@ export function InvitationExperience({ content }: { content: InvitationContent }
                       </button>
                       <button
                         className={styles.secondaryAction}
-                        onClick={() => {
-                          if (content.meetNuvaUrl) {
-                            window.open(content.meetNuvaUrl, "_blank");
+                        onClick={async () => {
+                          const result = await shareInvitation(content);
+                          if (result === "copied") {
+                            setShareLabel("已複製連結");
+                            setTimeout(() => setShareLabel("分享邀請函"), 2200);
                           }
                         }}
                       >
-                        <ExternalLink size={15} />
-                        活動頁面
+                        <Share2 size={15} />
+                        {shareLabel}
                       </button>
                     </div>
                   </div>
@@ -873,7 +949,8 @@ export function InvitationExperience({ content }: { content: InvitationContent }
       {speakerModal && (
         <SpeakerProfileModal
           content={content}
-          onClose={() => setSpeakerModal(false)}
+          speaker={speakerModal}
+          onClose={() => setSpeakerModal(null)}
         />
       )}
 

@@ -12,7 +12,7 @@ import {
   Users,
   Settings,
 } from "lucide-react";
-import type { InvitationContent, Registration } from "@/lib/invitation-content";
+import type { InvitationContent, Registration, Speaker } from "@/lib/invitation-content";
 import { defaultInvitationContent } from "@/lib/invitation-content";
 import styles from "./AdminEditor.module.css";
 
@@ -266,6 +266,25 @@ export function AdminEditor() {
     );
   }
 
+  function speakerField(index: number, key: keyof Speaker, label: string, multiline = false) {
+    const value = form.speakers[index]?.[key] ?? "";
+    const update = (next: string) =>
+      setForm((prev) => ({
+        ...prev,
+        speakers: prev.speakers.map((s, i) => (i === index ? { ...s, [key]: next } : s)),
+      }));
+    return (
+      <label key={`${index}-${key}`}>
+        <span>{label}</span>
+        {multiline ? (
+          <textarea rows={4} value={value} onChange={(e) => update(e.target.value)} />
+        ) : (
+          <input type="text" value={value} onChange={(e) => update(e.target.value)} />
+        )}
+      </label>
+    );
+  }
+
   if (!password) {
     return <LoginPanel onLogin={handleLogin} />;
   }
@@ -371,21 +390,27 @@ export function AdminEditor() {
             {field("chapterName", "主辦單位名稱 *")}
             {field("eventDate", "活動日期")}
             {field("eventTime", "活動時間")}
-            {field("startAt", "開始時間 ISO（2026-09-17T06:30:00+08:00）")}
-            {field("endAt", "結束時間 ISO（2026-09-17T08:30:00+08:00）")}
-            {field("speakerName", "講者姓名 *")}
-            {field("speakerCompany", "講者公司")}
-            {field("speakerRoles", "講者職稱")}
+            {field("startAt", "開始時間 ISO（2026-12-03T06:30:00+08:00）")}
+            {field("endAt", "結束時間 ISO（2026-12-03T08:30:00+08:00）")}
+            {form.speakers.map((_, i) => (
+              <fieldset key={i} style={{ display: "grid", gap: 12, border: "1px solid rgb(33 28 28 / 0.12)", borderRadius: 8, padding: 12 }}>
+                <legend style={{ fontWeight: 900, padding: "0 6px" }}>講者 {i + 1}</legend>
+                {speakerField(i, "name", "姓名 *")}
+                {speakerField(i, "role", "職稱")}
+                {speakerField(i, "company", "公司")}
+                {speakerField(i, "photo", "照片路徑（/speakers/xxx.jpg）")}
+                {speakerField(i, "bio", "講者介紹", true)}
+              </fieldset>
+            ))}
             {field("topic", "演講主題 *")}
             {field("tagline", "主題標語（海報副標）")}
             {field("description", "活動簡介", "textarea")}
-            {field("highlights", "品牌亮點（每行一條）", "textarea")}
-            {field("speakerBio", "講者介紹", "textarea")}
+            {field("highlights", "分享重點（每行一條）", "textarea")}
             {field("locationName", "地點名稱")}
             {field("locationAddress", "地點地址")}
             {field("fee", "費用")}
             {field("referralAudience", "適合對象")}
-            {field("posterImagePath", "海報圖片路徑（/poster.jpg）")}
+            {field("posterImagePath", "海報圖片路徑（/poster-20261203.jpg）")}
             {field("linkedinUrl", "LinkedIn URL")}
             {field("meetNuvaUrl", "MeetNuva URL")}
             {field("couponTitle", "邀請序號標題")}
@@ -433,7 +458,11 @@ export function AdminEditor() {
                 {form.locationAddress && `・${form.locationAddress}`}
               </p>
               <p>
-                <strong>{form.speakerName}</strong> {form.speakerRoles}
+                {form.speakers.map((s) => (
+                  <span key={s.name} style={{ display: "block" }}>
+                    <strong>{s.name}</strong> {s.role}・{s.company}
+                  </span>
+                ))}
               </p>
               <p>{form.topic}</p>
               {form.description && <p style={{ color: "#625b57" }}>{form.description}</p>}

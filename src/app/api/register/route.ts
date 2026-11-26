@@ -5,7 +5,9 @@ import type { Registration } from "@/lib/invitation-content";
 
 export const runtime = "nodejs";
 
-function makeCouponCode(name: string, lineId: string) {
+/** BNI + event month/day, e.g. BNI1203-ABC123. */
+function makeCouponCode(name: string, lineId: string, startAt: string) {
+  const prefix = `BNI${startAt.slice(5, 7)}${startAt.slice(8, 10)}`;
   const seed = `${name}:${lineId}:${Date.now()}`;
   let hash = 0;
 
@@ -14,7 +16,7 @@ function makeCouponCode(name: string, lineId: string) {
     hash |= 0;
   }
 
-  return `BNI0917-${Math.abs(hash).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
+  return `${prefix}-${Math.abs(hash).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
 }
 
 export async function POST(request: Request) {
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
       lineId: input.lineId,
       email: input.email,
       referrerName: input.referrerName,
-      couponCode: makeCouponCode(input.name, input.lineId),
+      couponCode: makeCouponCode(input.name, input.lineId, content.startAt),
       source: input.source,
     };
 

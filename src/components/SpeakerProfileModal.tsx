@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { X } from "lucide-react";
 import styles from "./SpeakerProfileModal.module.css";
-import type { InvitationContent } from "@/lib/invitation-content";
+import type { InvitationContent, Speaker } from "@/lib/invitation-content";
 
 type Props = {
   content: InvitationContent;
+  speaker: Speaker;
   onClose: () => void;
 };
 
-export function SpeakerProfileModal({ content, onClose }: Props) {
+export function SpeakerProfileModal({ content, speaker, onClose }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const partners = content.speakers.filter((s) => s.name !== speaker.name);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -35,7 +38,7 @@ export function SpeakerProfileModal({ content, onClose }: Props) {
       className={styles.overlay}
       role="dialog"
       aria-modal="true"
-      aria-label={`${content.speakerName} 講者介紹`}
+      aria-label={`${speaker.name} 講者介紹`}
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
@@ -55,16 +58,33 @@ export function SpeakerProfileModal({ content, onClose }: Props) {
         <div className={styles.content}>
           <div className={styles.profileHeader}>
             <div className={styles.avatarWrapper}>
-              <div className={styles.avatarMonogram}>
-                {content.speakerName.charAt(0)}
-              </div>
+              {speaker.photo ? (
+                <Image
+                  src={speaker.photo}
+                  alt={speaker.name}
+                  width={180}
+                  height={180}
+                  className={styles.avatar}
+                />
+              ) : (
+                <div className={styles.avatarMonogram}>
+                  {speaker.name.charAt(0)}
+                </div>
+              )}
             </div>
             <div className={styles.profileTitles}>
-              <h2>{content.speakerName}</h2>
-              <p className={styles.headline}>{content.speakerRoles}</p>
-              <p className={styles.company}>{content.speakerCompany}</p>
+              <h2>{speaker.name}</h2>
+              <p className={styles.headline}>{speaker.role}</p>
+              <p className={styles.company}>{speaker.company}</p>
             </div>
           </div>
+
+          {speaker.bio && (
+            <div className={styles.section}>
+              <h3>本場分享</h3>
+              <p className={styles.aboutText}>{speaker.bio}</p>
+            </div>
+          )}
 
           <div className={styles.section}>
             <h3>主題</h3>
@@ -74,16 +94,9 @@ export function SpeakerProfileModal({ content, onClose }: Props) {
             )}
           </div>
 
-          {content.speakerBio && (
-            <div className={styles.section}>
-              <h3>關於講者</h3>
-              <p className={styles.aboutText}>{content.speakerBio}</p>
-            </div>
-          )}
-
           {content.highlights.length > 0 && (
             <div className={styles.section}>
-              <h3>品牌亮點</h3>
+              <h3>分享重點</h3>
               <ul className={styles.highlightList}>
                 {content.highlights.map((item) => (
                   <li key={item}>
@@ -95,10 +108,16 @@ export function SpeakerProfileModal({ content, onClose }: Props) {
             </div>
           )}
 
-          <div className={styles.section}>
-            <h3>活動簡介</h3>
-            <p className={styles.aboutText}>{content.description}</p>
-          </div>
+          {partners.length > 0 && (
+            <div className={styles.section}>
+              <h3>搭檔講者</h3>
+              <p className={styles.aboutText}>
+                {partners
+                  .map((p) => `${p.company} ${p.role} ${p.name}`)
+                  .join("、")}
+              </p>
+            </div>
+          )}
 
           {content.referralAudience && (
             <div className={styles.section}>

@@ -1,6 +1,7 @@
 import {
   defaultInvitationContent,
   type InvitationContent,
+  type Speaker,
 } from "./invitation-content";
 
 export type RegistrationInput = {
@@ -110,6 +111,33 @@ function toLineList(value: unknown): unknown[] {
     .filter(Boolean);
 }
 
+// Only same-origin asset paths, so admin edits cannot point images off-site.
+function cleanAssetPath(value: unknown, maxLength = 220) {
+  const text = cleanText(value, maxLength);
+  return text.startsWith("/") && !text.startsWith("//") ? text : "";
+}
+
+function cleanSpeakers(value: unknown): Speaker[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      const raw =
+        item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+      return {
+        name: cleanText(raw.name, 80),
+        role: cleanText(raw.role, 80),
+        company: cleanText(raw.company, 120),
+        bio: cleanMultiline(raw.bio, 800),
+        photo: cleanAssetPath(raw.photo),
+      };
+    })
+    .filter((speaker) => speaker.name)
+    .slice(0, 4);
+}
+
 export function validateInvitationContent(
   input: unknown,
 ): ValidationResult<InvitationContent> {
@@ -126,17 +154,14 @@ export function validateInvitationContent(
     eventTime: cleanText(payload.eventTime, 60),
     startAt: cleanIsoDateTime(payload.startAt, defaultInvitationContent.startAt),
     endAt: cleanIsoDateTime(payload.endAt, defaultInvitationContent.endAt),
-    speakerName: cleanText(payload.speakerName, 80),
-    speakerCompany: cleanText(payload.speakerCompany, 120),
-    speakerRoles: cleanText(payload.speakerRoles, 160),
+    speakers: cleanSpeakers(payload.speakers),
     topic: cleanText(payload.topic, 80),
     tagline: cleanText(payload.tagline, 120),
-    description: cleanText(payload.description, 220),
+    description: cleanText(payload.description, 300),
     highlights: highlightsValue
       .map((item) => cleanText(item, 60))
       .filter(Boolean)
       .slice(0, 6),
-    speakerBio: cleanMultiline(payload.speakerBio, 800),
     locationName: cleanText(payload.locationName, 120),
     locationAddress: cleanText(payload.locationAddress, 180),
     fee: cleanText(payload.fee, 40),
@@ -146,17 +171,16 @@ export function validateInvitationContent(
       .slice(0, 8),
     referralAudience: cleanText(payload.referralAudience, 160),
     posterImagePath:
-      cleanText(payload.posterImagePath, 220) ||
+      cleanAssetPath(payload.posterImagePath) ||
       defaultInvitationContent.posterImagePath,
     linkedinUrl: cleanUrl(payload.linkedinUrl),
-    meetNuvaUrl:
-      cleanUrl(payload.meetNuvaUrl) || defaultInvitationContent.meetNuvaUrl,
+    meetNuvaUrl: cleanUrl(payload.meetNuvaUrl),
     couponTitle: cleanText(payload.couponTitle, 100),
     couponDescription: cleanText(payload.couponDescription, 260),
     organizerEmail: cleanText(payload.organizerEmail, 160).toLowerCase(),
   };
 
-  if (!content.eventTitle || !content.speakerName || !content.topic) {
+  if (!content.eventTitle || content.speakers.length === 0 || !content.topic) {
     return { ok: false, error: "活動標題、講者姓名與主題為必填。" };
   }
 
